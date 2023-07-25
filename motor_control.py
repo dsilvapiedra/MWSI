@@ -77,10 +77,10 @@ def controlar_motores(motor_input, movimiento_input):
         movimiento = movimiento_input
 
         if movimiento == "F":
-            for _ in range(50):
+            for _ in range(10):
                 step_forward(motor)
         elif movimiento == "B":
-            for _ in range(50):
+            for _ in range(10):
                 step_backward(motor)
 
     except KeyboardInterrupt:
