@@ -1,3 +1,3 @@
 # MWSI
 -----------------
-Roman Demzcylo - Diego Silva Piedra
+Roman Demczylo - Diego Silva Piedra
