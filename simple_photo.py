@@ -20,6 +20,9 @@ def take_photo(exposure_time, N):
         cam.start() # Start recording
         imgs = [cam.get_array() for n in range(N)] # Get 10 frames
         cam.stop() # Stop recording
+        cam.start() # Start recording
+        imgs = [cam.get_array() for n in range(N)] # Get 10 frames
+        cam.stop() # Stop recording
     
     	#Promedia las fotos 
         img_mean = 1/N*(sum(imgs)).astype(float)
@@ -42,6 +45,7 @@ def main():
     
     # Decodifica
     I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(image_data)
+       
        
     # Crea objeto 
     im = Image.fromarray(I90.astype(np.uint8))
