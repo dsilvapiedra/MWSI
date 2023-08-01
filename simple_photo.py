@@ -29,10 +29,11 @@ def take_photo(exposure_time, N):
     
     return imgs[0]
     
-def main():
+def main(name = None):
 
     #Nombre archivo
-    name = sys.argv[1]
+    if name is None:
+        name = sys.argv[1]
    
     #Exposicion
     exposure_time = 5000
@@ -45,14 +46,14 @@ def main():
     
     # Decodifica
     I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(image_data)
-       
+    S0 = (I90 + I45 + I135 + I0)//2   
        
     # Crea objeto 
-    im = Image.fromarray(I90.astype(np.uint8))
+    im = Image.fromarray(cv2.cvtColor(I90,cv2.COLOR_BGR2RGB).astype(np.uint8))
   
     # Guarda imagen
     os.makedirs(IMG_SAVE_PATH, exist_ok=True)
-    im.save(IMG_SAVE_PATH + name + ".jpg")   
+    im.save(IMG_SAVE_PATH + name + ".png")   
     return True
 
 if __name__ == '__main__':
