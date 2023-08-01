@@ -7,22 +7,22 @@ import cv2
 from tools import stokeslib
 from PIL import Image 
 from simple_pyspin import Camera
-       
-IMG_SAVE_PATH = 'img/'       
+
+IMG_SAVE_PATH = 'img/'              
 def take_photo(exposure_time, N):
 		
     with Camera() as cam: # Acquire and initialize Camera
     	#Exposicion
-    	cam.ExposureAuto = 'Off'
-    	cam.ExposureTime = 10000 # microseconds
+        cam.ExposureAuto = 'Off'
+        cam.ExposureTime = exposure_time # microseconds
     	
     	#Toma las fotos
-    	cam.start() # Start recording
-    	imgs = [cam.get_array() for n in range(N)] # Get 10 frames
-    	cam.stop() # Stop recording
+        cam.start() # Start recording
+        imgs = [cam.get_array() for n in range(N)] # Get 10 frames
+        cam.stop() # Stop recording
     
-    	#Promedia las fotos
-    	img_mean = 1/N*(sum(imgs)).astype(float)
+    	#Promedia las fotos 
+        img_mean = 1/N*(sum(imgs)).astype(float)
     
     return imgs[0]
     
@@ -42,16 +42,13 @@ def main():
     
     # Decodifica
     I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(image_data)
-    
-    
-    
+       
     # Crea objeto 
     im = Image.fromarray(I90.astype(np.uint8))
   
     # Guarda imagen
     os.makedirs(IMG_SAVE_PATH, exist_ok=True)
-    im.save(IMG_SAVE_PATH + name + ".jpg")    
-
+    im.save(IMG_SAVE_PATH + name + ".jpg")   
     return True
 
 if __name__ == '__main__':
