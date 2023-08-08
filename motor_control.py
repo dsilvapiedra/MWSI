@@ -2,24 +2,30 @@ import RPi.GPIO as GPIO
 import time
 
 # Diccionario con pines de GPIO para cada motor
-motor_pins = {
+motores = {
     "X": {
-        "motor_pin1": 17,
-        "motor_pin2": 22,
-        "motor_pin3": 2,
-        "motor_pin4": 3
+        "motor_pins": {
+            "motor_pin1": 17,
+            "motor_pin2": 22,
+            "motor_pin3": 2,
+            "motor_pin4": 3},
+        "step_num": 10,
     },
     "Y": {
-        "motor_pin1": 26,
-        "motor_pin2": 16,
-        "motor_pin3": 20,
-        "motor_pin4": 21
+        "motor_pins": {
+            "motor_pin1": 26,
+            "motor_pin2": 16,
+            "motor_pin3": 20,
+            "motor_pin4": 21, },
+        "step_num": 10,
     },
     "T": {
-        "motor_pin1": 19,
-        "motor_pin2": 13,
-        "motor_pin3": 6,
-        "motor_pin4": 5
+        "motor_pins": {
+            "motor_pin1": 19,
+            "motor_pin2": 13,
+            "motor_pin3": 6,
+            "motor_pin4": 5, },
+        "step_num": 512//6, #512 por vuelta
     }
 }
 
@@ -38,14 +44,16 @@ sequence_theta = [[1, 0, 0, 0],
 # Configuración de los pines GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-for motor, pins in motor_pins.items():
+
+for motor, motor_info in zip(motores.keys(), motores.values()):
+    pins = motor_info['motor_pins']
     for pin in pins.values():
         GPIO.setup(pin, GPIO.OUT)
 
 
 # Función para avanzar el motor un paso
 def step_forward(motor):
-    pins = motor_pins[motor]
+    pins = motores[motor].get('motor_pins')
     sequence = sequence_nema if motor == "X" or motor == "Y" else sequence_theta
     for step in sequence:
         GPIO.output(pins["motor_pin1"], step[0])
@@ -57,7 +65,7 @@ def step_forward(motor):
 
 # Función para retroceder el motor un paso
 def step_backward(motor):
-    pins = motor_pins[motor]
+    pins = motores[motor].get('motor_pins')
     sequence = sequence_nema if motor == "X" or motor == "Y" else sequence_theta
     for step in reversed(sequence):
         GPIO.output(pins["motor_pin1"], step[0])
@@ -70,17 +78,17 @@ def step_backward(motor):
 # Función para controlar los motores
 def controlar_motores(motor_input, movimiento_input):
     try:
-        if motor_input not in motor_pins or movimiento_input not in ["F", "B"]:
+        if motor_input not in motores or movimiento_input not in ["F", "B"]:
             raise ValueError("Motor o movimiento no válido.")
-        
+
         motor = motor_input
         movimiento = movimiento_input
-
+        steps = motores[motor].get("step_num")
         if movimiento == "F":
-            for _ in range(10):
+            for _ in range(steps):
                 step_forward(motor)
         elif movimiento == "B":
-            for _ in range(10):
+            for _ in range(steps):
                 step_backward(motor)
 
     except KeyboardInterrupt:

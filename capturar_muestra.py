@@ -19,6 +19,22 @@ INDICE_FINAL = X_STEPS * Y_STEPS
 # Definir el tiempo de espera entre movimientos (en segundos)
 TIEMPO_ESPERA = 0.5
 
+# Definir angulos para polarizacion
+POL_ANGS = [0, 60, 120]
+
+def captura_polarizacion(nombre_img):
+    for angulo in POL_ANGS:
+        main(nombre_img + '_' + str(angulo))
+        if angulo != POL_ANGS[-1]:
+            print("Mover T en direccion F")
+            comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T F"
+            ejecutar_comando_ssh(comando)
+    # volver a posicion original
+    for _ in range(len(POL_ANGS)-1):
+        print("Mover T en direccion B")
+        comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T B"
+        ejecutar_comando_ssh(comando)
+
 def capturar_muestra(X, Y):
     x = y = 0
     dx = 0
@@ -29,7 +45,7 @@ def capturar_muestra(X, Y):
             print (x, y)
             
             # Tomar una foto en la posición actual de la grilla
-            main(str(i).zfill(2))
+            captura_polarizacion(str(i).zfill(2))
 
             
 

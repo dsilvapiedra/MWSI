@@ -8,8 +8,8 @@ from tools import stokeslib
 from PIL import Image 
 from simple_pyspin import Camera
 
-hsize = 350
-vsize = 250
+hsize = 450
+vsize = 350
 hoffset = 40
 voffset = 20
 prop = 0.75
@@ -59,7 +59,7 @@ def begin_stream(exposure_time, N):
 def main():
 
     #Exposicion
-    exposure_time = 5000
+    exposure_time = 20000
     
     # Numero de promedios
     N = 1
