@@ -29,11 +29,10 @@ def take_photo(exposure_time, N):
     return imgs[0]
     
 def main(name = None):
-   
     # Configuracion de la camara
     
     # Exposicion
-    exposure_time = 5000
+    exposure_time = 1000
     
     # Numero de promedios
     N = 1
@@ -54,10 +53,9 @@ def main(name = None):
     S_in_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos), dtype=float)[::decimador,::decimador]
     
     for i, theta in enumerate(thetas_list):
-    	# Toma una foto
-    	take_photo(exposure_time, N):
-	print("Toma foto")
-    
+        # Toma una foto
+        image_data = take_photo(exposure_time, N)
+        print("Toma foto")    
         #  Decodifica
         I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(image_data)    
     

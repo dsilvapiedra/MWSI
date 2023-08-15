@@ -47,7 +47,7 @@ def begin_stream(exposure_time, N):
             S0, S1, S2 = stokeslib.calcular_stokes(I90, I45, I135, I0)
         
             # Actualiza imagen
-            cv2.imshow("img1", I90.astype(np.uint8))
+            cv2.imshow("img1", S0.astype(np.uint8))
             
             #Espera comando
             k = cv2.waitKey(1)
