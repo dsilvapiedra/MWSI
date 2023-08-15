@@ -3,7 +3,7 @@ import sys
 
 RPI_USER = 'mwsi'
 RPI_PASS = 'mwsi'
-RPI_IP = '10.42.0.112'
+RPI_IP = '169.254.110.82'  #10.42.0.112
 RPI_PORT = 22
 
 def ejecutar_comando_ssh(comando):

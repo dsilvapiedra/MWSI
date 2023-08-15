@@ -191,7 +191,7 @@ def instrumentacion_media_std(A):
 #                                 Segunda componente: Dimensión horizonal pixeles [0, dimx]
 #                                 Tercera componente: Canales de colores Blue (B), Green (G) y Red (R) 
 #
-def calcular_stokes (I90, I45, I135, I0, A, calibrar, decimador):
+def calcular_stokes (I90, I45, I135, I0, A = None, calibrar = False, decimador = 1):
     #Decimador
   I0 = I0[::decimador,::decimador]
   I45 = I45[::decimador,::decimador]

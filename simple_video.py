@@ -1,4 +1,3 @@
-import PySpin
 import sys
 import numpy as np
 import keyboard
@@ -8,8 +7,8 @@ from tools import stokeslib
 from PIL import Image 
 from simple_pyspin import Camera
 
-hsize = 450
-vsize = 350
+hsize = 900
+vsize = 700
 hoffset = 40
 voffset = 20
 prop = 0.75
@@ -44,8 +43,11 @@ def begin_stream(exposure_time, N):
             #Decodifica la imagen
             I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(img_mean)
         
+            # Calcula Stokes 	
+            S0, S1, S2 = stokeslib.calcular_stokes(I90, I45, I135, I0)
+        
             # Actualiza imagen
-            cv2.imshow("img1", I90)
+            cv2.imshow("img1", I90.astype(np.uint8))
             
             #Espera comando
             k = cv2.waitKey(1)
@@ -59,7 +61,7 @@ def begin_stream(exposure_time, N):
 def main():
 
     #Exposicion
-    exposure_time = 20000
+    exposure_time = 5000
     
     # Numero de promedios
     N = 1
