@@ -1,7 +1,7 @@
 from simple_photo import main
 from motor_control_ssh import ejecutar_comando_ssh
 import time
-
+import numpy as np
 
 # Definir la cantidad de pasos en cada dirección
 X_STEPS = 6
@@ -35,7 +35,13 @@ def captura_polarizacion(nombre_img):
         comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T B"
         ejecutar_comando_ssh(comando)
 
-def capturar_muestra(X, Y):
+def mover_motor(motor, direccion, pasos=1):
+    for _ in range(pasos):
+        print(f"Mover {motor} en direccion ", direccion)
+        comando = f"cd /home/mwsi/Desktop/main && python motor_control.py {motor} {direccion}"
+        ejecutar_comando_ssh(comando)
+
+def capturar_espiral(X, Y):
     x = y = 0
     dx = 0
     dy = -1
@@ -55,15 +61,46 @@ def capturar_muestra(X, Y):
         
         if dx != 0:
             direccion_x = "F" if dx > 0 else "B"
-            print("Mover X en direccion ", direccion_x)
-
-            comando = f"cd /home/mwsi/Desktop/main && python motor_control.py X {direccion_x}"
-            ejecutar_comando_ssh(comando)
+            mover_motor('X',"F" if dx > 0 else "B")
             
         if dy != 0:
             direccion_y = "F" if dy > 0 else "B"
-            print("Mover Y en direccion ", direccion_y)
-            comando = f"cd /home/mwsi/Desktop/main && python motor_control.py Y {direccion_y}"
-            ejecutar_comando_ssh(comando)
+            mover_motor('Y',direccion_y)
+
+def capturar_muestra(X, Y):
+    # comienza en centro x, extremo y
+    x = 0
+    y = -centro_y + 1
+    dx = -1
+    dy = 0
+    for i in range(max(X, Y)**2):
+        # Si estamos dentro de los límites, capturamos
+        if (-X/2 <= x <= X/2) and (-Y/2 <= y <= Y/2):
+            print (x, y)
+            # Tomar una foto en la posición actual de la grilla
+            captura_polarizacion(str(i).zfill(2))
+
+
+        #if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
+        if x in [-X/2, X/2]:
+            if dy == 0:
+                dx, dy = 0, 1
+            else:
+                dx, dy = -np.sign(x), 0
+    
+        x, y = x+dx, y+dy
+        
+        if dx != 0:
+            direccion_x = "F" if dx > 0 else "B"
+            mover_motor('X',"F" if dx > 0 else "B")
+            
+        if dy != 0:
+            direccion_y = "F" if dy > 0 else "B"
+            mover_motor('Y',direccion_y)
+            
+    # volver a posicion inicial
+    print('Volviendo a posición inicial...')
+    mover_motor('Y', 'B', Y_STEPS)
+    mover_motor('X', 'B', X_STEPS//2)
 
 capturar_muestra(X_STEPS, Y_STEPS)        
