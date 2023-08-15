@@ -7,6 +7,7 @@ import cv2
 from tools import stokeslib
 from PIL import Image 
 from simple_pyspin import Camera
+from motor_control_ssh import ejecutar_comando_ssh
 
 IMG_LOAD_PATH = 'input_stokes/'            
 IMG_SAVE_PATH = 'mueller/'
@@ -30,10 +31,6 @@ def take_photo(exposure_time, N):
     
 def main(name = None):
 
-    #Nombre archivo
-    if name is None:
-        name = sys.argv[1]
-   
     # Configuracion de la camara
     
     # Exposicion
@@ -45,7 +42,7 @@ def main(name = None):
     # Datos
 
     #Decimador 
-    decimador = 1
+    decimador = 8
     
     # Dimension sensor
     dim = (2048,2448)         
@@ -55,28 +52,34 @@ def main(name = None):
     N_datos = len(thetas_list)
 
     #Matrices de estadísticas	
-    with open(IMG_LOAD_PATH + 'Sin.npy', 'wb') as f:
-        np.load(f, S_in_stat)           
+    S_in_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos), dtype=float)[::decimador,::decimador]
+    with open(IMG_LOAD_PATH + 'Sin.npy', 'rb') as f:
+        S_in_stat = np.load(f)[::decimador,::decimador]           
     S_out_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos))[::decimador,::decimador]
     
     #Captura vectores de Stokes
     for i in range(N_datos):
     	#Toma la foto
-    	image_data = take_photo(exposure_time, N)
+        image_data = take_photo(exposure_time, N)
         
         #  Decodifica
         I90, I45, I135, I0 = stokeslib.polarization_full_dec_array(image_data)    
         
         # Stokes        
-        S_out_stat[:,:,:,0,i], S_out_stat[:,:,:,1,i], S_out_stat[:,:,:,2,i]  = stokeslib.calcular_stokes(I90, I45, I135, I0)
+        S_out_stat[:,:,:,0,i], S_out_stat[:,:,:,1,i], S_out_stat[:,:,:,2,i]  = stokeslib.calcular_stokes(I90, I45, I135, I0, decimador = decimador)
+
+         #Mueve el motor
+        print("Mover T en direccion F")
+        comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T F"
+        ejecutar_comando_ssh(comando)
 
     #Calcula Mueller
     M = stokeslib.calcular_mueller(S_in_stat,S_out_stat)
-    
+    M_img = cv2.normalize(stokeslib.acoplar_mueller(M), None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
     #Guarda Mueller
     os.makedirs(IMG_SAVE_PATH, exist_ok=True)
-    im_S0.save(IMG_SAVE_PATH + "S0_" + str(theta) + ".png") 
-    im.save(IMG_SAVE_PATH + name + ".png")   
+    im_mueller = Image.fromarray(cv2.cvtColor(M_img,cv2.COLOR_BGR2RGB))
+    im_mueller.save(IMG_SAVE_PATH + "Mueller"+".png") 
     
     return True
 
