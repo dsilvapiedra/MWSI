@@ -3,4 +3,5 @@ img
 img/*
 *.jpg
 *.png
+input_stokes/*.npy
 settings.json
