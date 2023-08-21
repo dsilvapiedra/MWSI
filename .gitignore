@@ -5,3 +5,6 @@ img/*
 *.png
 input_stokes/*.npy
 settings.json
+mueller/mueller.npy
+stokes/S.npy
+stokes/Sin.npy
