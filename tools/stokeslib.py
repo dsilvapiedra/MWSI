@@ -377,45 +377,39 @@ def lu_chipman_3x3(M):
     for j in range(2):
       MD[:,:,1+i,1+j] = a*I2[:,:,i,j] + b*np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]
 
-  # Matriz Singular
-  if (D2 == np.ones_like(D2)).any():
-    return MD, MD, MD, M[:,:,0,0]
+  #M Diatenuación inversa
+  MD_inv[:,:,0,0] = np.ones_like(D2)/(1-D2)
+  for i in range(2):
+    MD_inv[:,:,0,1+i] = -D[:,:,i]/(1-D2)
+    MD_inv[:,:,1+i,0] = -D[:,:,i]/(1-D2)
+    for j in range(2):
+      MD_inv[:,:,1+i,1+j] = I2[:,:,i,j]/a+np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]/(a**2*(1+a))
 
-  # Matriz no Singular
-  else:
-    #M Diatenuación inversa
-    MD_inv[:,:,0,0] = np.ones_like(D2)/(1-D2)
-    for i in range(2):
-      MD_inv[:,:,0,1+i] = -D[:,:,i]/(1-D2)
-      MD_inv[:,:,1+i,0] = -D[:,:,i]/(1-D2)
-      for j in range(2):
-        MD_inv[:,:,1+i,1+j] = I2[:,:,i,j]/a+np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]/(a**2*(1+a))
+  #M Prima
+  Mprima = np.einsum('ijkl,ijlm->ijkm',M_norm[:,:,:,:],np.linalg.pinv(MD))
+  mprima = Mprima[:,:,1:,1:]
 
-    #M Prima
-    Mprima = np.einsum('ijkl,ijlm->ijkm',M_norm[:,:,:,:],MD_inv)
-    mprima = Mprima[:,:,1:,1:]
+  #M Delta
+  mdr = np.einsum('ijkl,ijlm->ijkm',mprima,mprima.transpose(0,1,3,2))
+  L , V = np.linalg.eig(mdr)
 
-    #M Delta
-    mdr = np.einsum('ijkl,ijlm->ijkm',mprima,mprima.transpose(0,1,3,2))
-    L , V = np.linalg.eig(mdr)
+  #Depolarizancia
+  delta = np.sqrt(np.abs(L[:,:,0])) * (L[:,:,0] >= L[:,:,1]) + np.sqrt(np.abs(L[:,:,1])) * (L[:,:,0] < L[:,:,1])
+  MDelta = np.zeros_like(M)
+  MDelta[:,:,0,0] = np.ones(M[:,:,0,0].shape)
+  MDelta[:,:,1,1] = delta
+  MDelta[:,:,2,2] = delta
 
-    #Depolarizancia
-    delta = np.sqrt(np.abs(L[:,:,0])) * (L[:,:,0] >= L[:,:,1]) + np.sqrt(np.abs(L[:,:,1])) * (L[:,:,0] < L[:,:,1])
-    MDelta = np.zeros_like(M)
-    MDelta[:,:,0,0] = np.ones(M[:,:,0,0].shape)
-    MDelta[:,:,1,1] = delta
-    MDelta[:,:,2,2] = delta
+  #Polarizancia:
+  PDelta = np.zeros((M.shape[0],M.shape[1],2))
+  for i in range(2):
+    PDelta[:,:,i] = (M_norm[:,:,1+i,0] - np.einsum('ijkl,ijl->ijk',M_norm[:,:,1:,1:],D)[:,:,i])/(1-D2)
+  MDelta[:,:,1:,0] = PDelta
+  
+  #M Retardancia
+  MR = np.einsum('ijkl,ijlm->ijkm', np.linalg.pinv(MDelta), Mprima)
 
-    #Polarizancia:
-    PDelta = np.zeros((M.shape[0],M.shape[1],2))
-    for i in range(2):
-      PDelta[:,:,i] = (M_norm[:,:,1+i,0] - np.einsum('ijkl,ijl->ijk',M_norm[:,:,1:,1:],D)[:,:,i])/(1-D2)
-    MDelta[:,:,1:,0] = PDelta
-    
-    #M Retardancia
-    MR = np.einsum('ijkl,ijlm->ijkm', np.linalg.pinv(MDelta), Mprima)
-
-    return MDelta, MR, MD, M[:,:,0,0]
+  return MDelta, MR, MD, M[:,:,0,0]
 
 # Devuelve la matriz de Mueller 4x4 del polarizador lineal con transmitancia T, tasa de extinción e y 
 # ángulo de polarización theta_d (en grados)
@@ -483,9 +477,3 @@ def calcular_dolp(S0,S1,S2):
 def calcular_aolp(S1,S2):
   aolp = 0.5*arctan3(S2.astype(float),S1.astype(float))
   return aolp
-
-if __name__ == '__main__':
-  if main():
-    sys.exit(0)
-  else:
-    sys.exit(1)
