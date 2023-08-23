@@ -15,11 +15,16 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 IMG_SAVE_PATH = 'stokes/'  
             
-def main(name = None):
+def main(input = None):
+
+    # Bandera entrada
+    if input is None:
+        input = sys.argv[1]
+
     # Configuracion de la camara
     
     # Exposicion
-    exposure_time = 1000
+    exposure_time = 5000
     
     # Numero de promedios
     N = 1
@@ -31,7 +36,6 @@ def main(name = None):
     Mag = 22
 
     #Bandera de entrada
-    input = 0
     name = "Sin.npy" if input else "S.npy"
     
     # Dimension sensor
@@ -88,7 +92,7 @@ def main(name = None):
 
     # Guarda Stokes
     print("Guardando array...")
-    with open(IMG_SAVE_PATH + name + ".npy", 'wb') as f:
+    with open(IMG_SAVE_PATH + name, 'wb') as f:
         np.save(f, S_in_stat)
         
     return True
