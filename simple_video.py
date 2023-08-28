@@ -25,7 +25,7 @@ N = 1
 cv2.namedWindow('img', cv2.WINDOW_NORMAL)
 cv2.moveWindow('img', hoffset, voffset)
 cv2.resizeWindow('img', int(prop*int(1.25*hsize)), int(prop*int(1.25*vsize)))
-cv2.setWindowTitle('img', 'S0')	
+cv2.setWindowTitle('img', 'I90')	
 
 def main():
     
@@ -45,7 +45,7 @@ def main():
             S0, S1, S2 = stokeslib.calcular_stokes(I90, I45, I135, I0)
         
             # Actualiza imagen
-            cv2.imshow("img", I90.astype(np.uint8))
+            cv2.imshow("img", S0.astype(np.uint8))
             
             #Espera comando
             k = cv2.waitKey(1)

@@ -93,7 +93,7 @@ def main(input = None):
     # Guarda Stokes
     print("Guardando array...")
     with open(IMG_SAVE_PATH + name, 'wb') as f:
-        np.save(f, S_in_stat)
+        np.save(f, np.linalg.pinv(S_in_stat)) if input else np.save(f, S_in_stat)
         
     return True
 

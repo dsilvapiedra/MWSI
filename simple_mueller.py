@@ -42,7 +42,7 @@ def main(name = None):
     #Matrices de estadísticas	
     with open(IMG_LOAD_PATH + 'Sin.npy', 'rb') as f:
         print("Cargando Stokes de entrada...")
-        S_in_stat = np.load(f)[::decimador,::decimador]           
+        S_in_stat_inv = np.load(f)[::decimador,::decimador]           
     
     S_out_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos))[::decimador,::decimador]
     
@@ -72,7 +72,7 @@ def main(name = None):
 
     #Calcula Mueller
     print("Calculando Matriz de Mueller...")
-    M = stokeslib.calcular_mueller(S_in_stat,S_out_stat)
+    M = stokeslib.calcular_mueller_inv(S_in_stat_inv,S_out_stat)
 
     #Guarda numpy array
     print("Guardando...")

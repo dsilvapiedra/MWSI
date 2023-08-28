@@ -247,6 +247,12 @@ def calcular_mueller(S_in_stat,S_out_stat):
   M = np.einsum('ijklm,ijkmn->ijkln',S_out_stat,np.linalg.pinv(S_in_stat))
   return M
 
+# Version con Sin ya invertida
+
+def calcular_mueller_inv(S_in_stat_inv,S_out_stat):
+  M = np.einsum('ijklm,ijkmn->ijkln',S_out_stat,S_in_stat_inv)
+  return M
+
 # Calcula matriz de Mueller en un canal (tiempo real)
 # Recibe como entrada los vectores de stokes de entrada (Sin) y los vectores de Stokes de salida (Sout)
 # Devuelve la matriz de Mueller M del sistema en un único canal
