@@ -4,8 +4,8 @@ import time
 import numpy as np
 
 # Definir la cantidad de pasos en cada dirección
-X_STEPS = 6
-Y_STEPS = 6
+X_STEPS = 10
+Y_STEPS = 10
 
 # Calcular la posición del centro en términos de pasos
 centro_x = X_STEPS // 2
@@ -103,4 +103,8 @@ def capturar_muestra(X, Y):
     mover_motor('Y', 'B', Y_STEPS)
     mover_motor('X', 'B', X_STEPS//2)
 
+tic = time.time()
 capturar_muestra(X_STEPS, Y_STEPS)        
+toc = time.time()
+
+print("Muestra completa capturada en "+str(toc-tic)+" s")
