@@ -483,3 +483,13 @@ def calcular_dolp(S0,S1,S2):
 def calcular_aolp(S1,S2):
   aolp = 0.5*arctan3(S2.astype(float),S1.astype(float))
   return aolp
+
+def main():
+  return True
+
+if __name__ == '__main__':
+
+    if main():
+        sys.exit(0)
+    else:
+        sys.exit(1)
