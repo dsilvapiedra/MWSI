@@ -1,10 +1,6 @@
 import sys
 import numpy as np
-import keyboard
-import os
 import cv2
-from tools import stokeslib
-from PIL import Image 
 from simple_pyspin import Camera
 from tools.camaralib import take_stokes
 
@@ -38,8 +34,11 @@ def main():
             #Capturar Stokes
             S = take_stokes(exposure_time, N)
 
+            #S0 normalizacion
+            S0 = (S[:,:,:,0]//2).astype(np.uint8)
+
             # Actualiza imagen
-            cv2.imshow("img", S[:,:,:,0].astype(np.uint8))
+            cv2.imshow("img", S0)
             
             #Espera comando
             k = cv2.waitKey(1)

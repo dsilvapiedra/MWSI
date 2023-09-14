@@ -1,7 +1,17 @@
-from simple_photo import main
+import sys
+from tools.camaralib import take_stokes
 from motor_control_ssh import ejecutar_comando_ssh
 import time
 import numpy as np
+import cv2
+
+IMG_SAVE_PATH = 'img/'   
+
+#Exposicion
+exposure_time = 5000
+
+# Numero de promedios
+N = 1
 
 # Definir la cantidad de pasos en cada dirección
 X_STEPS = 10
@@ -24,7 +34,7 @@ POL_ANGS = [0, 60, 120]
 
 def captura_polarizacion(nombre_img):
     for angulo in POL_ANGS:
-        main(nombre_img + '_' + str(angulo))
+        #main(nombre_img + '_' + str(angulo))
         if angulo != POL_ANGS[-1]:
             print("Mover T en direccion F")
             comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T F"
@@ -53,8 +63,6 @@ def capturar_espiral(X, Y):
             # Tomar una foto en la posición actual de la grilla
             captura_polarizacion(str(i).zfill(2))
 
-            
-
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
             dx, dy = -dy, dx
         x, y = x+dx, y+dy
@@ -67,19 +75,32 @@ def capturar_espiral(X, Y):
             direccion_y = "F" if dy > 0 else "B"
             mover_motor('Y',direccion_y)
 
-def capturar_muestra(X, Y):
+def capturar_muestra(X, Y, tipo):
     # comienza en centro x, extremo y
     x = 0
     y = -centro_y + 1
     dx = -1
     dy = 0
     for i in range(max(X, Y)**2):
+        
         # Si estamos dentro de los límites, capturamos
-        if (-X/2 <= x <= X/2) and (-Y/2 <= y <= Y/2):
+        if (-X/2 <= x <= X/2) and (-Y/2 <= y <= Y/2):    
+            
+            #Imprime posición actual
             print (x, y)
-            # Tomar una foto en la posición actual de la grilla
-            captura_polarizacion(str(i).zfill(2))
 
+            # Tomar segun el tipo una foto en la posición actual de la grilla
+            if tipo == 'mueller':
+
+                captura_polarizacion(str(i).zfill(2)) #Captura matriz de mueller
+
+            elif tipo == 'intensidad':
+
+                # Captura Stokes
+                S = take_stokes(exposure_time, N)
+
+                # Guarda imagen de intensidad
+                cv2.imwrite(IMG_SAVE_PATH + str(i).zfill(2) + '.png', S[:,:,:,0].astype(np.uint8))
 
         #if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
         if x in [-X/2, X/2]:
@@ -103,8 +124,24 @@ def capturar_muestra(X, Y):
     mover_motor('Y', 'B', Y_STEPS)
     mover_motor('X', 'B', X_STEPS//2)
 
-tic = time.time()
-capturar_muestra(X_STEPS, Y_STEPS)        
-toc = time.time()
+def main(tipo = None):
 
-print("Muestra completa capturada en "+str(toc-tic)+" s")
+    #Nombre archivo
+    if tipo is None:
+        tipo = sys.argv[1]
+
+    #Captura muestra, calcula tiempo
+    tic = time.time()
+    capturar_muestra(X_STEPS, Y_STEPS, tipo)        
+    toc = time.time()
+
+    print("Muestra completa capturada en "+str(int((toc-tic)//60))+" minutos y "+str(int((toc-tic) % 60))+' segundos.')
+
+    return True
+
+if __name__ == '__main__':
+
+    if main():
+        sys.exit(0)
+    else:
+        sys.exit(1)

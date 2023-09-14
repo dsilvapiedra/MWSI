@@ -191,19 +191,25 @@ def instrumentacion_media_std(A):
 #                                 Segunda componente: Dimensión horizonal pixeles [0, dimx]
 #                                 Tercera componente: Canales de colores Blue (B), Green (G) y Red (R) 
 #
-def calcular_stokes (I90, I45, I135, I0, A = None, calibrar = False, decimador = 1):
-    #Decimador
+def calcular_stokes (I90, I45, I135, I0, A = None, decimador = 1):
+
+  #Decimador
   I0 = I0[::decimador,::decimador]
   I45 = I45[::decimador,::decimador]
   I90 = I90[::decimador,::decimador]
   I135 = I135[::decimador,::decimador]
-  if not calibrar:
+  
+  #Modo sin calibración
+  if A == None:
+
     #Calculo
-    S0 = I0.astype(float)+I90.astype(float)
-    S1 = I0.astype(float)-I90.astype(float)
-    S2 = I45.astype(float)-I135.astype(float)
-    
+    S0 = I0.astype(np.int16)+I90.astype(np.int16)
+    S1 = I0.astype(np.int16)-I90.astype(np.int16)
+    S2 = I45.astype(np.int16)-I135.astype(np.int16)
+
+  #Modo calibrado  
   else:
+
     #Decimador
     A = A[::decimador,::decimador]
     A = A[::decimador,::decimador]
@@ -214,6 +220,7 @@ def calcular_stokes (I90, I45, I135, I0, A = None, calibrar = False, decimador =
     S0 = A[:,:,:,0,0]*I0.astype(float)+A[:,:,:,0,1]*I45.astype(float)+A[:,:,:,0,2]*I90.astype(float)+A[:,:,:,0,3]*I135.astype(float)
     S1 = A[:,:,:,1,0]*I0.astype(float)+A[:,:,:,1,1]*I45.astype(float)+A[:,:,:,1,2]*I90.astype(float)+A[:,:,:,1,3]*I135.astype(float)
     S2 = A[:,:,:,2,0]*I0.astype(float)+A[:,:,:,2,1]*I45.astype(float)+A[:,:,:,2,2]*I90.astype(float)+A[:,:,:,2,3]*I135.astype(float)
+  
   return S0, S1, S2
 
 
@@ -476,10 +483,12 @@ def linear_retardance(M_R):
 def arctan3(y,x):
   return np.mod(np.arctan2(y,x),2*np.pi)
 
+#Grado de polarización
 def calcular_dolp(S0,S1,S2):
   dolp = np.divide(np.sqrt(np.power(S1.astype(float),2) + np.power(S2.astype(float),2)),S0, out = np.zeros_like(S0.astype(float)), where = S0!= 0) 
   return dolp
 
+#Ángulo de polarización
 def calcular_aolp(S1,S2):
   aolp = 0.5*arctan3(S2.astype(float),S1.astype(float))
   return aolp
