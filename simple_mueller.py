@@ -1,9 +1,7 @@
 import sys
-import numpy as np
-from tools.stokeslib import acoplar_mueller
-from tools.camaralib import guardar_img, take_mueller
+from tools.camaralib import guardar_mueller, take_mueller
 
-IMG_LOAD_PATH = 'stokes/'            
+IMG_LOAD_PATH = 'stokes/Sin_inv.npy'            
 IMG_SAVE_PATH = 'mueller/'
 
 # Exposicion
@@ -17,26 +15,21 @@ thetas_list = [0,60,120]
 
 def main(name = None):
 
+    #Nombre archivo
+    if name is None:
+        name = sys.argv[1]
+
     #Captura matriz de Mueller
     M = take_mueller(exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
     #Guarda numpy array
-    print("Guardando...")
-    with open(IMG_SAVE_PATH + 'mueller.npy', 'wb') as f:
-        np.save(f, M)
+    #print("Guardando...")
+    #with open(IMG_SAVE_PATH + 'mueller.npy', 'wb') as f:
+    #    np.save(f, M)
 
-    #Mueller normalizada
-    
-        
-    #Guarda Mueller img
-    M_B = acoplar_mueller(M[:,:,0,:,:])
-    M_G = acoplar_mueller(M[:,:,1,:,:])
-    M_R = acoplar_mueller(M[:,:,2,:,:])
-    M_img = [M_B, M_G, M_R]
-        
-    for color, matriz in enumerate(M_img):
-        codigo=["B","G","R"]
-        guardar_img(IMG_SAVE_PATH, matriz, "Mueller_"+codigo[color]+".png", cmap = 'jet')
+    #Guardar matriz de Mueller
+    guardar_mueller(M, IMG_SAVE_PATH, name)
+
     return True
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from tools.stokeslib import polarization_full_dec_array, calcular_stokes, calcular_mueller_inv
+from tools.stokeslib import polarization_full_dec_array, calcular_stokes, calcular_mueller_inv, acoplar_mueller
 
 #Esta librería cuenta con algoritmos para controlar la cámara y los motores.
 
@@ -45,6 +45,9 @@ def take_photo(exposure_time, N):
         cam.ExposureAuto = 'Off'
         cam.ExposureTime = exposure_time # microseconds
     	
+        #Formato
+        cam.PixelFormat = "BayerRG8"
+
     	#Toma las fotos
         cam.start() # Start recording
         imgs = [cam.get_array() for n in range(N)] # Get 10 frames
@@ -76,7 +79,7 @@ def take_stokes(exposure_time, N):
     return S
 
 #Captura el vector de Stokes variando el ángulo de entrada
-def take_mueller_stokes(exposure_time, N, path, name, thetas_list):
+def take_mueller_stokes(exposure_time, N, path, thetas_list):
 
     # Dimension sensor
     dim = (2048,2448)  
@@ -88,7 +91,7 @@ def take_mueller_stokes(exposure_time, N, path, name, thetas_list):
     N_datos = len(thetas_list)
 
     #Matrices de estadísticas
-    S_in_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos), dtype=float)[::decimador,::decimador]
+    S_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos), dtype=float)[::decimador,::decimador]
     
     for i, theta in enumerate(thetas_list):
         # Toma una captura de Stokes
@@ -97,7 +100,7 @@ def take_mueller_stokes(exposure_time, N, path, name, thetas_list):
     
         #Almacena Stokes        
         for j in range(3):
-            S_in_stat[:,:,:,j,i] = S[:,:,:,j] 
+            S_stat[:,:,:,j,i] = S[:,:,:,j] 
 
         # Mientras no sea el ultimo
         if theta != thetas_list[-1]:
@@ -112,7 +115,7 @@ def take_mueller_stokes(exposure_time, N, path, name, thetas_list):
         comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T B"
         ejecutar_comando_ssh(comando)
 
-    return S_in_stat
+    return S_stat
 
 
 #Calcula la matriz de Mueller. Sincroniza con los motores, toma las fotos, 
@@ -129,28 +132,11 @@ def take_mueller(exposure_time, N, path, thetas_list):
     N_datos = len(thetas_list)
 
     #Matrices de estadísticas	
-    with open(path + 'Sin.npy', 'rb') as f:
+    with open(path, 'rb') as f:
         print("Cargando Stokes de entrada...")
         S_in_stat_inv = np.load(f)[::decimador,::decimador]           
     
-    S_out_stat = np.zeros((dim[0]//2,dim[1]//2,3,3,N_datos))[::decimador,::decimador]
-    
-    #Captura vectores de Stokes
-    for i, theta in enumerate(thetas_list):
-        # Stokes        
-        S_out_stat[:,:,:,:,i]  = take_stokes(exposure_time, N)
-
-        #Mueve el motor
-        if theta != thetas_list[-1]:
-            print("Moviendo T en direccion F...")
-            comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T F"
-            ejecutar_comando_ssh(comando)
-
-    # Volver a posicion original
-    for _ in range(len(thetas_list)-1):
-        print("Moviendo T en direccion B...")
-        comando = f"cd /home/mwsi/Desktop/main && python motor_control.py T B"
-        ejecutar_comando_ssh(comando)
+    S_out_stat = take_mueller_stokes(exposure_time, N, path, thetas_list)
 
     #Calcula Mueller
     print("Calculando Matriz de Mueller...")
@@ -169,7 +155,7 @@ def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
     ax = fig.add_subplot()
     im = ax.imshow(img, cmap=cmap)
     ax.set_title(name,fontsize = 20)
-    scalebar = AnchoredSizeBar(ax.transData, 0.5*Mag*50/3.45 , '50 μm', 'lower right', pad=0.2, 
+    scalebar = AnchoredSizeBar(ax.transData, 0.5*Mag*100/3.45 , '100 μm', 'lower right', pad=0.2, 
                                 color=color, frameon=False, size_vertical=6,
                                 fontproperties=fm.FontProperties(size=14))
     ax.add_artist(scalebar)
@@ -183,7 +169,7 @@ def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
 
 def guardar_stokes(S, path, name):
     #Colores
-    color = [450, 550, 650]
+    color = ['450', '550', '650']
 
     #S0 normalizada
     S0 = cv2.cvtColor((S[:,:,:,0]//2).astype(np.uint8),cv2.COLOR_BGR2RGB)
@@ -204,6 +190,28 @@ def guardar_stokes(S, path, name):
             guardar_img(path, im, name + ' S' + str(j) + ' ('+color[i]+' nm)', color = 'red', clim=[-1,1])
 
     return True    
+
+def guardar_mueller(M, path, name):
+    #Codigo de color
+    codigo=["B","G","R"]
+
+    for i in range(3):
+        #Guarda Mueller img
+        M_acoplada = acoplar_mueller(M[:,:,i,:,:])
+        
+        #Normalizar Mueller
+        M_norm = ((M_acoplada + np.ones_like(M_acoplada))*127.5)
+        
+        #Impurezas 
+        M_norm[M_norm > 255] = 255
+        M_norm[M_norm < 0] = 0
+
+        #Colormap
+        im = cv2.cvtColor(cv2.applyColorMap(M_norm.astype(np.uint8), cv2.COLORMAP_JET),cv2.COLOR_BGR2RGB)
+            
+        #Guardar
+        guardar_img(path, im, name+" Mueller_"+codigo[i], cmap = 'jet', clim=[-1,1])
+    return True
 
 
 def main():
