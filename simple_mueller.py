@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 from tools.camaralib import guardar_mueller, take_mueller
 
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy'            
@@ -23,9 +24,9 @@ def main(name = None):
     M = take_mueller(exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
     #Guarda numpy array
-    #print("Guardando...")
-    #with open(IMG_SAVE_PATH + 'mueller.npy', 'wb') as f:
-    #    np.save(f, M)
+    print("Guardando...")
+    with open(IMG_SAVE_PATH + name + ' mueller.npy', 'wb') as f:
+        np.save(f, M)
 
     #Guardar matriz de Mueller
     guardar_mueller(M, IMG_SAVE_PATH, name)

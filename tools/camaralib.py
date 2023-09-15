@@ -79,7 +79,7 @@ def take_stokes(exposure_time, N):
     return S
 
 #Captura el vector de Stokes variando el ángulo de entrada
-def take_mueller_stokes(exposure_time, N, path, thetas_list):
+def take_mueller_stokes(exposure_time, N, thetas_list):
 
     # Dimension sensor
     dim = (2048,2448)  
@@ -136,7 +136,7 @@ def take_mueller(exposure_time, N, path, thetas_list):
         print("Cargando Stokes de entrada...")
         S_in_stat_inv = np.load(f)[::decimador,::decimador]           
     
-    S_out_stat = take_mueller_stokes(exposure_time, N, path, thetas_list)
+    S_out_stat = take_mueller_stokes(exposure_time, N, thetas_list)
 
     #Calcula Mueller
     print("Calculando Matriz de Mueller...")

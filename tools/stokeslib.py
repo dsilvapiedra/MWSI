@@ -391,12 +391,12 @@ def lu_chipman_3x3(M):
       MD[:,:,1+i,1+j] = a*I2[:,:,i,j] + b*np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]
 
   #M Diatenuación inversa
-  MD_inv[:,:,0,0] = np.ones_like(D2)/(1-D2)
-  for i in range(2):
-    MD_inv[:,:,0,1+i] = -D[:,:,i]/(1-D2)
-    MD_inv[:,:,1+i,0] = -D[:,:,i]/(1-D2)
-    for j in range(2):
-      MD_inv[:,:,1+i,1+j] = I2[:,:,i,j]/a+np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]/(a**2*(1+a))
+  #MD_inv[:,:,0,0] = np.ones_like(D2)/(1-D2)
+  #for i in range(2):
+  #  MD_inv[:,:,0,1+i] = -D[:,:,i]/(1-D2)
+  #  MD_inv[:,:,1+i,0] = -D[:,:,i]/(1-D2)
+  #  for j in range(2):
+  #    MD_inv[:,:,1+i,1+j] = I2[:,:,i,j]/a+np.einsum('ijk,ijl->ijkl',D,D)[:,:,i,j]/(a**2*(1+a))
 
   #M Prima
   Mprima = np.einsum('ijkl,ijlm->ijkm',M_norm[:,:,:,:],np.linalg.pinv(MD))
