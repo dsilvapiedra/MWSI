@@ -39,7 +39,7 @@ def main():
 
             # Actualiza imagen
             cv2.imshow("img", S0)
-            
+
             #Espera comando
             k = cv2.waitKey(1)
             

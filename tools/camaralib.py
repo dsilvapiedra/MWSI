@@ -195,6 +195,8 @@ def guardar_mueller(M, path, name):
     #Codigo de color
     codigo=["B","G","R"]
 
+    M_RGB = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint16)
+
     for i in range(3):
         #Guarda Mueller img
         M_acoplada = acoplar_mueller(M[:,:,i,:,:])
@@ -206,11 +208,18 @@ def guardar_mueller(M, path, name):
         M_norm[M_norm > 255] = 255
         M_norm[M_norm < 0] = 0
 
+        #Mueller color RGB
+        M_RGB[:,:,2-i] = M_norm.astype(np.uint16)
+
         #Colormap
         im = cv2.cvtColor(cv2.applyColorMap(M_norm.astype(np.uint8), cv2.COLORMAP_JET),cv2.COLOR_BGR2RGB)
             
         #Guardar
-        guardar_img(path, im, name+" Mueller_"+codigo[i], cmap = 'jet', clim=[-1,1])
+        guardar_img(path, im, name + " Mueller_"+codigo[i], cmap = 'jet', clim=[-1,1])
+    
+    #Guardar Mueller color
+    cv2.imwrite(path + name + 'Mueller_RGB' + '.png', M_RGB)
+
     return True
 
 
