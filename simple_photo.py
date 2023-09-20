@@ -1,7 +1,8 @@
 import sys
-import numpy as np
 import cv2
+import numpy as np
 from tools.camaralib import take_stokes, guardar_img, digitalizar
+from tools.stokeslib import calcular_dolp, calcular_aolp
 
 IMG_SAVE_PATH = 'img/'              
 
@@ -20,14 +21,22 @@ def main(name = None):
     #Capturar Stokes
     S = take_stokes(exposure_time, N)
        
-    # Guarda imagenes
+    # Codigo de colores
     color = ['650','550','450']
     
+    #DoLP y AoLP
+    dolp = calcular_dolp(S[:,:,:,0],S[:,:,:,1],S[:,:,:,2])
+    aolp = calcular_aolp(S[:,:,:,1],S[:,:,:,2])
+
     #Digitaliza intensidad
     S0_norm = digitalizar(S[:,:,:,0], 'S0')
+    dolp_norm = digitalizar(dolp, 'dolp')
+    aolp_norm = digitalizar(aolp, 'aolp')
     
     #Color
     S0_RGB = cv2.cvtColor(S0_norm,cv2.COLOR_BGR2RGB)
+    dolp_RGB = cv2.cvtColor(dolp_norm,cv2.COLOR_BGR2RGB)
+    aolp_RGB = cv2.cvtColor(aolp_norm,cv2.COLOR_BGR2RGB)
 
     #Guarda imagen en color
     guardar_img(IMG_SAVE_PATH, S0_RGB, name + ' S0')
@@ -37,9 +46,13 @@ def main(name = None):
 
         #Colormap
         im = cv2.cvtColor(cv2.applyColorMap(S0_RGB[:,:,i], cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
-        
+        dolp_im = cv2.cvtColor(cv2.applyColorMap(dolp_RGB[:,:,i], cv2.COLORMAP_JET),cv2.COLOR_BGR2RGB)
+        aolp_im = cv2.cvtColor(cv2.applyColorMap(aolp_RGB[:,:,i], cv2.COLORMAP_JET),cv2.COLOR_BGR2RGB)
+
         #Guardar
         guardar_img(IMG_SAVE_PATH, im, name + ' S0 ('+color[i]+' nm)', color = 'red', clim=[0,2])
+        guardar_img(IMG_SAVE_PATH, dolp_im, name + ' DoLP ('+color[i]+' nm)', color = 'gray', cmap = 'jet', clim=[0,1])
+        guardar_img(IMG_SAVE_PATH, aolp_im, name + ' AoLP ('+color[i]+' nm)', color = 'gray', cmap = 'jet', clim=[-np.pi/2,np.pi/2])
 
     #S1 y S2 en grises con colorbar
     for i in range(3):
@@ -51,7 +64,7 @@ def main(name = None):
             #Colormap
             im = cv2.cvtColor(cv2.applyColorMap(S_norm, cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
             guardar_img(IMG_SAVE_PATH, im, name + ' S' + str(j) + ' ('+color[i]+' nm)', color = 'red', clim=[-1,1])
-    
+ 
     return True
 
 if __name__ == '__main__':

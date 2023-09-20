@@ -490,7 +490,7 @@ def calcular_dolp(S0,S1,S2):
 
 #Ángulo de polarización
 def calcular_aolp(S1,S2):
-  aolp = 0.5*arctan3(S2.astype(float),S1.astype(float))
+  aolp = np.pi/2-0.5*arctan3(S2.astype(float),S1.astype(float))
   return aolp
 
 def main():

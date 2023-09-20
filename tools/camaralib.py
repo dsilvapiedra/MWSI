@@ -152,6 +152,20 @@ def digitalizar(A, medida,  inversa = False):
         elif (medida == 'S1') or (medida == 'S2'):
             A_digital = ((A + MAX8) // 2).astype(np.uint8)
 
+        #DoLP entre 0 y 1
+        elif medida == 'dolp':
+            A_digital = A*MAX8
+            A_digital[A_digital > MAX8] = MAX8
+            A_digital[A_digital < 0] = 0
+            A_digital = A_digital.astype(np.uint8)
+
+        #AoLP entre -pi y pi
+        elif medida == 'aolp':
+            A_digital = (A+np.pi/2)/np.pi*MAX8
+            A_digital[A_digital > MAX8] = MAX8
+            A_digital[A_digital < 0] = 0
+            A_digital = A_digital.astype(np.uint8)
+
         #Mueller en 8 bits
         elif medida == 'M8':
             A_digital = ((A + 1)/2 * MAX8)
