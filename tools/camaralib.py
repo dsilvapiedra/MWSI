@@ -36,7 +36,7 @@ def ejecutar_comando_ssh(comando):
     return stdout.readlines()
 
 
-#Captura una imagen de intensidad 
+#Captura una imagen de intensidad  simplepyspin
 
 def take_photo(exposure_time, N):
 		
@@ -117,25 +117,17 @@ def take_mueller_stokes(exposure_time, N, thetas_list):
 
     return S_stat
 
-
 #Calcula la matriz de Mueller. Sincroniza con los motores, toma las fotos, 
 # carga la Sin invertida y entrega la matriz de mueller observada.
 
-def take_mueller(exposure_time, N, path, thetas_list):
+def take_mueller(S_in_stat_inv, exposure_time, N, path, thetas_list):
     #Dimension del sensor
     dim = (2048,2448) 
-
-    #Decimador 
-    decimador = 1
 
     #Número de ángulos
     N_datos = len(thetas_list)
 
-    #Matrices de estadísticas	
-    with open(path, 'rb') as f:
-        print("Cargando Stokes de entrada...")
-        S_in_stat_inv = np.load(f)[::decimador,::decimador]           
-    
+    #Captura Stokes en los tres ángulos
     S_out_stat = take_mueller_stokes(exposure_time, N, thetas_list)
 
     #Calcula Mueller
@@ -144,48 +136,105 @@ def take_mueller(exposure_time, N, path, thetas_list):
 
     return M
 
+#Digitalizadora de medidas físicas
+
+def digitalizar(A, medida,  inversa = False):
+    #Constantes
+    MAX8 = 2**8-1
+    MAX16 = 2**16-1
+
+    if not inversa:
+        #Intensidad
+        if medida == 'S0':
+            A_digital = (A // 2).astype(np.uint8)
+
+        #Polarización
+        elif (medida == 'S1') or (medida == 'S2'):
+            A_digital = ((A + MAX8) // 2).astype(np.uint8)
+
+        #Mueller en 8 bits
+        elif medida == 'M8':
+            A_digital = ((A + 1)/2 * MAX8)
+            A_digital[A_digital > MAX8] = MAX8
+            A_digital[A_digital < 0] = 0
+            A_digital = A_digital.astype(np.uint8)
+        
+        #Mueller en 16 bits
+        elif medida == 'M16':
+            A_digital = ((A + 1)/2 * MAX16)
+            A_digital[A_digital > MAX16] = MAX16
+            A_digital[A_digital < 0] = 0
+            A_digital = A_digital.astype(np.uint16)
+
+    return A_digital
+
+
 # Guarda imagen con la barra
 
 def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
     # Magnificacion
     Mag = 22
 
-    # Guarda figura
+    #Crea Figure
     fig = plt.figure()
+
+    #Crea ejes
     ax = fig.add_subplot()
+
+    #Muestra la imagen
     im = ax.imshow(img, cmap=cmap)
+
+    #Titulo
     ax.set_title(name,fontsize = 20)
+
+    #Barra
     scalebar = AnchoredSizeBar(ax.transData, 0.5*Mag*100/3.45 , '100 μm', 'lower right', pad=0.2, 
                                 color=color, frameon=False, size_vertical=6,
                                 fontproperties=fm.FontProperties(size=14))
     ax.add_artist(scalebar)
+    #Limites de la barra
     if clim != None:
         cbar = plt.colorbar(im)
         im.set_clim(vmin=clim[0],vmax=clim[1])
+
+    #Guarda Figura
     plt.savefig(path + name + ".png")
+
+    #Cierra Figura
     plt.close()
 
     return None
 
 def guardar_stokes(S, path, name):
-    #Colores
-    color = ['450', '550', '650']
+    #Colores R G B
+    color = ['650', '550', '450']
 
-    #S0 normalizada
-    S0 = cv2.cvtColor((S[:,:,:,0]//2).astype(np.uint8),cv2.COLOR_BGR2RGB)
+    #Digitaliza S0
+    S0_norm = digitalizar(S[:,:,:,0], 'S0')
+
+    #Color S0
+    S0_RGB = cv2.cvtColor(S0_norm,cv2.COLOR_BGR2RGB)
 
     #Guarda imagen en color
-    guardar_img(path, S0, name + ' S0')
+    guardar_img(path, S0_RGB, name + ' S0')
 
     #S0 en grises con colorbar
     for i in range(3):
-        im = cv2.cvtColor(cv2.applyColorMap(S0[:,:,i], cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
+
+        #Colormap canal
+        im = cv2.cvtColor(cv2.applyColorMap(S0_RGB[:,:,i], cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
+
+        #Guarda imagen
         guardar_img(path, im, name + ' S0 ('+color[i]+' nm)', color = 'red', clim=[0,2])
 
     #S1 y S2 en grises con colorbar
     for i in range(3):
         for j in range(1,3):
-            S_norm = ((S[:,:,i,j]+255)//2).astype(np.uint8)
+            
+            #Digitaliza S1 o S2
+            S_norm = digitalizar(S[:,:,i,j], 'S1')
+
+            #Colormap
             im = cv2.cvtColor(cv2.applyColorMap(S_norm, cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
             guardar_img(path, im, name + ' S' + str(j) + ' ('+color[i]+' nm)', color = 'red', clim=[-1,1])
 
@@ -193,35 +242,29 @@ def guardar_stokes(S, path, name):
 
 def guardar_mueller(M, path, name):
     #Codigo de color
-    codigo=["B","G","R"]
+    codigo=['R','G','B']
 
-    M_RGB = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint16)
+    #Mueller RGB
+    M_RGB16 = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint16)
 
     for i in range(3):
-        #Guarda Mueller img
+        #Acoplar en una imagen la Matriz de Mueller en el canal
         M_acoplada = acoplar_mueller(M[:,:,i,:,:])
         
-        #Normalizar Mueller
-        M_norm = ((M_acoplada + np.ones_like(M_acoplada))*127.5)
-        
-        #Impurezas 
-        M_norm[M_norm > 255] = 255
-        M_norm[M_norm < 0] = 0
-
-        #Mueller color RGB
-        M_RGB[:,:,2-i] = M_norm.astype(np.uint16)
+        #Normalizar Mueller en 8 y 16 bits
+        M_norm8 = digitalizar(M_acoplada, "M8")
+        M_RGB16[:,:,i] = digitalizar(M_acoplada, "M16")
 
         #Colormap
-        im = cv2.cvtColor(cv2.applyColorMap(M_norm.astype(np.uint8), cv2.COLORMAP_JET),cv2.COLOR_BGR2RGB)
+        im = cv2.cvtColor(cv2.applyColorMap(M_norm8, cv2.COLORMAP_JET), cv2.COLOR_BGR2RGB)
             
         #Guardar
-        guardar_img(path, im, name + " Mueller_"+codigo[i], cmap = 'jet', clim=[-1,1])
+        guardar_img(path, im, name + " Mueller_" + codigo[i], cmap = 'jet', clim = [-1,1])
     
     #Guardar Mueller color
-    cv2.imwrite(path + name + 'Mueller_RGB' + '.png', M_RGB)
+    cv2.imwrite(path + name + 'Mueller_RGB' + '.png', M_RGB16)
 
     return True
-
 
 def main():
   return True

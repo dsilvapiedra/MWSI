@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import cv2
-from tools.camaralib import take_stokes, guardar_img
+from tools.camaralib import take_stokes, guardar_img, digitalizar
 
 IMG_SAVE_PATH = 'img/'              
 
@@ -21,23 +21,34 @@ def main(name = None):
     S = take_stokes(exposure_time, N)
        
     # Guarda imagenes
-    color = ['450','550','650']
+    color = ['650','550','450']
     
-    #S0 normalizada
-    S0 = cv2.cvtColor((S[:,:,:,0]//2).astype(np.uint8),cv2.COLOR_BGR2RGB)
+    #Digitaliza intensidad
+    S0_norm = digitalizar(S[:,:,:,0], 'S0')
+    
+    #Color
+    S0_RGB = cv2.cvtColor(S0_norm,cv2.COLOR_BGR2RGB)
 
     #Guarda imagen en color
-    guardar_img(IMG_SAVE_PATH, S0, name + ' S0')
+    guardar_img(IMG_SAVE_PATH, S0_RGB, name + ' S0')
 
     #S0 en grises con colorbar
     for i in range(3):
-        im = cv2.cvtColor(cv2.applyColorMap(S0[:,:,i], cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
+
+        #Colormap
+        im = cv2.cvtColor(cv2.applyColorMap(S0_RGB[:,:,i], cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
+        
+        #Guardar
         guardar_img(IMG_SAVE_PATH, im, name + ' S0 ('+color[i]+' nm)', color = 'red', clim=[0,2])
 
     #S1 y S2 en grises con colorbar
     for i in range(3):
         for j in range(1,3):
-            S_norm = ((S[:,:,i,j]+255)//2).astype(np.uint8)
+
+            #Digitaliza S1 o S2
+            S_norm = digitalizar(S[:,:,i,j], 'S1')
+            
+            #Colormap
             im = cv2.cvtColor(cv2.applyColorMap(S_norm, cv2.COLORMAP_BONE),cv2.COLOR_BGR2RGB)
             guardar_img(IMG_SAVE_PATH, im, name + ' S' + str(j) + ' ('+color[i]+' nm)', color = 'red', clim=[-1,1])
     

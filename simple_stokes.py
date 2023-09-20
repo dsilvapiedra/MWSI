@@ -1,6 +1,7 @@
 import sys
 from tools.camaralib import take_mueller_stokes, guardar_stokes
 import numpy as np
+import gzip
 
 IMG_SAVE_PATH = 'stokes/'  
 
@@ -19,19 +20,19 @@ thetas_list = ['0','60','120']
 def main():
 
     #Nombre
-    name = 'Sin_inv.npy'
+    name = 'Sin_inv.npy.gz'
 
     #Toma vectores de Stokes
-    S_in_stat = take_mueller_stokes(exposure_time, N, IMG_SAVE_PATH, name, thetas_list)
+    S_in_stat = take_mueller_stokes(exposure_time, N, thetas_list)
         
     #Guarda cada vector de Stokes
-    for i in range(3):
-        guardar_stokes(S_in_stat[:,:,:,:,i], IMG_SAVE_PATH, name + thetas_list[i])
+    #for i in range(3):
+    #    guardar_stokes(S_in_stat[:,:,:,:,i], IMG_SAVE_PATH, name + thetas_list[i])
 
-    #Guarda numpy stokes
+    #Guarda numpy stokes comprimido
     print("Guardando array...")
-    with open(IMG_SAVE_PATH + name, 'wb') as f:
-        np.save(f, np.linalg.pinv(S_in_stat))
+    f = gzip.GzipFile(IMG_SAVE_PATH + name, 'wb')
+    np.save(f, np.linalg.pinv(S_in_stat))
 
     return True
 
