@@ -286,7 +286,7 @@ def calcular_mueller_canal(S_in_stat,S_out_stat):
   Mueller_img = np.einsum('ijlm,ijmn->ijln',S_out_stat,np.linalg.pinv(S_in_stat))
   return Mueller_img
   
-# Acopla componentes de la matriz de Mueller en una sola imagen
+# Acopla componentes de la matriz de Mueller en una sola imagen monocromática
 #
 # M[:,:,:,:]: 
 #               Primera componente: Dimensión vertical pixeles [0, dimy]
@@ -307,6 +307,16 @@ def acoplar_mueller(M):
   M_show = np.append(M1_show, M2_show, axis = 0)
   M_show = np.append(M_show, M3_show, axis = 0)
   return M_show
+
+#Desacoplar imagen y recuperar array en RGB
+
+def desacoplar_mueller(M_show):
+  M = np.zeros((M_show.shape[0]//3,M_show.shape[1]//3,3,3,3),dtype=float)
+  for i in range(3):
+    for j in range(3):
+      for k in range(3):
+        M[:,:,k,i,j] = M_show[i*1024:(i+1)*1024,j*1224:(j+1)*1224,k]
+  return M
 
 # Promedia matriz de Mueller
 #
@@ -366,7 +376,7 @@ def mueller_mean(M):
 #               Primera componente: Dimensión vertical pixeles [0, dimy]
 #               Segunda componente: Dimensión horizonal pixeles [0, dimx]
 #
-def lu_chipman_3x3(M):
+def lu_chipman(M):
   #Identidades
   I2 = np.stack([np.stack([np.identity(2)]*M.shape[1])]*M.shape[0])
   I3 = np.stack([np.stack([np.identity(3)]*M.shape[1])]*M.shape[0])
