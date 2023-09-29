@@ -31,11 +31,6 @@ def main(name = None):
     #Captura matriz de Mueller
     M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
-    #Guarda numpy array
-    #print("Guardando...")
-    #with open(IMG_SAVE_PATH + name + ' mueller.npy', 'wb') as f:
-    #    np.save(f, M)
-
     #Guardar matriz de Mueller
     guardar_mueller(M, IMG_SAVE_PATH, name)
 

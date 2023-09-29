@@ -305,7 +305,7 @@ def guardar_mueller(M, path, name):
         guardar_img(path, im, name + ' Mueller_' + codigo[i], cmap = 'jet', clim = [-1,1])
     
     #Guardar Mueller color
-    cv2.imwrite(path + name + 'Mueller_RGB.png', M_RGB16)
+    cv2.imwrite(path + name + ' Mueller_RGB.png', M_RGB16)
 
     return True
 
