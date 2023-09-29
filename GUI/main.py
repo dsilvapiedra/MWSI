@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphics
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import QLibraryInfo
+from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraImageCapture
 
 sys.path.append('../')
 from tools.camaralib import take_stokes
@@ -25,6 +26,8 @@ class Ui(QMainWindow):
         # Carga GUI diseñado
         loadUi('gui.ui',self)       
         
+        self.cap = cv2.VideoCapture(0)
+        
         #Muestra imagen
         self.start_recording(self) 
 
@@ -32,23 +35,32 @@ class Ui(QMainWindow):
         self.show()
     
     def start_recording(self, label):
+        #Cronómetro
         timer = QtCore.QTimer(self)
+        
+        #Conexión
         timer.timeout.connect(self.update_image)
-        timer.start(500)
+        
+        #Comienzo
+        timer.start(0)
+
+        #Actualización
         self.update_image()    
 
     def update_image(self):
-        #Capturar Stokes
-        S = take_stokes(exposure_time, N)
+        #Captura imagen
+        ret, frame = self.cap.read()
 
-        #S0 normalizacion
-        S0 = (S[:,:,:,0]//2).astype(np.uint8)
+        #Dimensiones imagen
+        h, w, _ = frame.shape
 
-        #Formato Array to PixMap
-        h,w,_ = S0.shape
-        S0QIMG = QImage(S0, w, h, 3*w, QImage.Format_RGB888)
+        #Formato imagen
+        S0QIMG = QImage(frame, w, h, QImage.Format_RGB888)
         pixmap = QPixmap(S0QIMG)
-        self.S0.setPixmap(pixmap) 
+
+        #Plot
+        self.S0.setPixmap(pixmap)
+        
 
 def main():
     app = QApplication(sys.argv)
