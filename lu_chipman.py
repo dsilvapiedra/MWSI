@@ -14,7 +14,7 @@ def main(name = None):
         name = sys.argv[1]
 
     # Abrir imagen de Mueller en el formato que sea
-    M_show = cv2.imread(IMG_LOAD_PATH + name + 'Mueller_RGB.png',-1)
+    M_show = cv2.imread(IMG_LOAD_PATH + name + ' Mueller_RGB.png',-1)
 
     # Convertir imagen en Matriz
     M = png2mueller(M_show, 'M16')
