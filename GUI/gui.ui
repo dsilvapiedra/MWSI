@@ -221,7 +221,10 @@ QLabel {
                   <number>0</number>
                  </property>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="S0_2">
+                  <widget class="QLabel" name="S0">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
@@ -239,6 +242,9 @@ QLabel {
                    </property>
                    <property name="text">
                     <string/>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -952,7 +958,7 @@ QRadioButton{
          </widget>
         </item>
         <item row="0" column="0" rowspan="6" colspan="2">
-         <widget class="QLabel" name="S0">
+         <widget class="QLabel" name="S0_1">
           <property name="maximumSize">
            <size>
             <width>500</width>
