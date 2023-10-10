@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cv2
 from simple_pyspin import Camera
-from tools.camaralib import take_stokes
+from tools.stokeslib import polarization_full_dec_array, calcular_stokes
 
 #Tamaño ventana
 hsize = 900
@@ -29,13 +29,29 @@ def main():
     update = True
     		
     with Camera() as cam: # Acquire and initialize Camera
+
+        #Exposicion
+        cam.ExposureAuto = 'Off'
+        cam.ExposureTime = exposure_time # microseconds
+    	
+        #Formato
+        cam.PixelFormat = "BayerRG8"
+
+    	#Toma las fotos
+        cam.start() # Start recording
     	
         while update:    
             #Capturar Stokes
-            S = take_stokes(exposure_time, N)
+            img = cam.get_array()
+
+            #Medibles
+            I90, I45, I135, I0 = polarization_full_dec_array(img)
+
+            #Stokes
+            S0, S1, S2 = calcular_stokes (I90, I45, I135, I0)
 
             #S0 normalizacion
-            S0 = (S[:,:,:,0]//2).astype(np.uint8)
+            S0 = (S0//2).astype(np.uint8)
 
             # Actualiza imagen
             cv2.imshow("img", S0)
@@ -46,7 +62,9 @@ def main():
             if k == ord("q"):
                 cv2.destroyAllWindows()
                 update = False
-        
+
+        cam.stop() # Stop recording
+
     return True
 
 if __name__ == '__main__':
