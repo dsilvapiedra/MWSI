@@ -63,6 +63,8 @@ class Ui(QMainWindow):
 
     def start_recording(self, label):   	
         timer = QtCore.QTimer(self)
+        
+        #Conexión
         timer.timeout.connect(self.update_image)
         timer.start(0)
         self.update_image()    
@@ -84,7 +86,10 @@ class Ui(QMainWindow):
         h, w, _ = S0.shape
         S0QIMG = QImage(S0, w, h, QImage.Format_RGB888)
         pixmap = QPixmap(S0QIMG)
-        self.S0.setPixmap(pixmap) 
+
+        #Plot
+        self.S0.setPixmap(pixmap)
+        
 
 def main(cam):
     app = QApplication(sys.argv)
