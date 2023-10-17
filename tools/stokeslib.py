@@ -254,6 +254,17 @@ def calcular_mueller(S_in_stat,S_out_stat):
   M = np.einsum('ijklm,ijkmn->ijkln',S_out_stat,np.linalg.pinv(S_in_stat))
   return M
 
+def normalizar_mueller(M):
+  # Normaliza una matriz de mueller M
+  # En cada i,j y en cada color k, divide la componente i,j,k por m00
+
+  M_norm = M.copy()
+  for i in range(3):
+    for j in range(3):
+      for k in range(3):
+        M_norm[:, :, k, i, j] = M_norm[:, :, k, i, j] / M_norm[:, :, k, 0, 0]
+  return M_norm
+
 # Version con Sin ya invertida
 
 def calcular_mueller_inv(S_in_stat_inv,S_out_stat):

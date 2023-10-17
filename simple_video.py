@@ -35,7 +35,7 @@ def main():
         cam.ExposureTime = exposure_time # microseconds
     	
         #Formato
-        cam.PixelFormat = "BayerRG8"
+        #cam.PixelFormat = "BayerRG8"
 
     	#Toma las fotos
         cam.start() # Start recording

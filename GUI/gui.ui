@@ -333,7 +333,7 @@ QLabel {
                      <number>0</number>
                     </property>
                     <item row="3" column="2">
-                     <widget class="QToolButton" name="toolButton_11">
+                     <widget class="QToolButton" name="rotate_hourly">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -354,7 +354,7 @@ QLabel {
                       </property>
                       <property name="icon">
                        <iconset>
-                        <normaloff>../../../Descargas/rarrow.png</normaloff>../../../Descargas/rarrow.png</iconset>
+                        <normaloff>../../../../Descargas/rarrow.png</normaloff>../../../../Descargas/rarrow.png</iconset>
                       </property>
                       <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonIconOnly</enum>
@@ -365,7 +365,7 @@ QLabel {
                      </widget>
                     </item>
                     <item row="4" column="1">
-                     <widget class="QToolButton" name="toolButton_8">
+                     <widget class="QToolButton" name="dwn_btn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -403,7 +403,7 @@ QLabel {
                      </spacer>
                     </item>
                     <item row="3" column="1">
-                     <widget class="QToolButton" name="toolButton_9">
+                     <widget class="QToolButton" name="up_btn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -428,7 +428,7 @@ QLabel {
                      </widget>
                     </item>
                     <item row="3" column="0">
-                     <widget class="QToolButton" name="toolButton_7">
+                     <widget class="QToolButton" name="rotate_ahourly">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -449,7 +449,7 @@ QLabel {
                       </property>
                       <property name="icon">
                        <iconset>
-                        <normaloff>../../../Descargas/larrow.png</normaloff>../../../Descargas/larrow.png</iconset>
+                        <normaloff>../../../../Descargas/larrow.png</normaloff>../../../../Descargas/larrow.png</iconset>
                       </property>
                       <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonIconOnly</enum>
@@ -460,7 +460,7 @@ QLabel {
                      </widget>
                     </item>
                     <item row="4" column="2">
-                     <widget class="QToolButton" name="toolButton_10">
+                     <widget class="QToolButton" name="right_btn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -485,7 +485,7 @@ QLabel {
                      </widget>
                     </item>
                     <item row="4" column="0">
-                     <widget class="QToolButton" name="toolButton_12">
+                     <widget class="QToolButton" name="left_btn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -510,7 +510,7 @@ QLabel {
                      </widget>
                     </item>
                     <item row="8" column="0" colspan="3">
-                     <widget class="QPushButton" name="pushButton_7">
+                     <widget class="QPushButton" name="capture_btn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -801,7 +801,7 @@ QRadioButton{
           </property>
           <property name="icon">
            <iconset>
-            <normaloff>../../../Descargas/larrow.png</normaloff>../../../Descargas/larrow.png</iconset>
+            <normaloff>../../../../Descargas/larrow.png</normaloff>../../../../Descargas/larrow.png</iconset>
           </property>
           <property name="toolButtonStyle">
            <enum>Qt::ToolButtonIconOnly</enum>
@@ -885,7 +885,7 @@ QRadioButton{
           </property>
           <property name="icon">
            <iconset>
-            <normaloff>../../../Descargas/rarrow.png</normaloff>../../../Descargas/rarrow.png</iconset>
+            <normaloff>../../../../Descargas/rarrow.png</normaloff>../../../../Descargas/rarrow.png</iconset>
           </property>
           <property name="toolButtonStyle">
            <enum>Qt::ToolButtonIconOnly</enum>
@@ -1377,7 +1377,7 @@ font-weight: bold;
      <x>0</x>
      <y>0</y>
      <width>983</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

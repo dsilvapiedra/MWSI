@@ -1,13 +1,15 @@
+import os
 import sys
 from tools.stokeslib import acoplar_mueller
-from tools.camaralib import take_stokes, take_mueller
+from tools.camaralib import digitalizar, take_mueller
 from motor_control_ssh import ejecutar_comando_ssh
 import time
 import numpy as np
 import cv2
+import gzip
 
-IMG_LOAD_PATH = 'stokes/Sin_inv.npy' 
-IMG_SAVE_PATH = 'img/'  
+IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'    
+
 
 #Exposicion
 exposure_time = 5000
@@ -16,8 +18,8 @@ exposure_time = 5000
 N = 1
 
 # Definir la cantidad de pasos en cada dirección
-X_STEPS = 10
-Y_STEPS = 10
+X_STEPS = 2
+Y_STEPS = 2
 
 # Calcular la posición del centro en términos de pasos
 centro_x = X_STEPS // 2
@@ -33,6 +35,11 @@ TIEMPO_ESPERA = 0.5
 
 #Angulos de polarizacion de entrada
 thetas_list = [0,60,120]  
+
+#Matrices de estadísticas	
+f = gzip.GzipFile(IMG_LOAD_PATH, 'rb')
+S_in_stat_inv = np.load(f)          
+
 
 #def captura_polarizacion(nombre_img):
 #    for angulo in POL_ANGS:
@@ -77,12 +84,19 @@ def capturar_espiral(X, Y):
             direccion_y = "F" if dy > 0 else "B"
             mover_motor('Y',direccion_y)
 
-def capturar_muestra(X, Y, tipo):
+def capturar_muestra(X, Y):
     # comienza en centro x, extremo y
     x = 0
     y = -centro_y + 1
     dx = -1
     dy = 0
+
+    # Pide directorio donde guardar las imagenes
+    IMG_SAVE_PATH = input("Ingresa el directorio destino: ")
+    
+    if not os.path.exists(IMG_SAVE_PATH): 
+        os.makedirs(IMG_SAVE_PATH)
+
     for i in range(max(X, Y)**2):
         
         # Si estamos dentro de los límites, capturamos
@@ -91,40 +105,31 @@ def capturar_muestra(X, Y, tipo):
             #Imprime posición actual
             print (x, y)
 
-            # Tomar segun el tipo una foto en la posición actual de la grilla
-            if tipo == 'mueller':
+            m00, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
-                M = take_mueller(exposure_time, N, IMG_LOAD_PATH, thetas_list)
-
-                M_norm_color = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint8)
-
-                for j in range(3):
-                    #Guarda Mueller img
-                    M_acoplada = acoplar_mueller(M[:,:,j,:,:])
-                    
-                    #Normalizar Mueller
-                    M_norm = ((M_acoplada + np.ones_like(M_acoplada))*127.5)
-                    
-                    #Impurezas 
-                    M_norm[M_norm > 255] = 255
-                    M_norm[M_norm < 0] = 0
-
-                    #Arma matriz de mueller en colores
-                    M_norm_color[:,:,j] = M_norm
+            M_dig_color = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint16)
+            I = np.zeros((1024,1224,3),dtype=np.uint8)
+            for j in range(3):
+                #Guarda Mueller img
+                M_acoplada = acoplar_mueller(M[:,:,j,:,:])
                 
-                # Guarda Matriz de Mueller
-                cv2.imwrite(IMG_SAVE_PATH + str(i).zfill(2) + '.png', M_norm_color)
+                #Digitaliza Mueller
+                M_dig = digitalizar(M_acoplada, 'M16')
 
-            elif tipo == 'intensidad':
+                #Arma matriz de mueller en colores
+                M_dig_color[:,:,j] = M_dig
 
-                # Captura Stokes
-                S = take_stokes(exposure_time, N)
+                #Intensidad
+                I[:,:,j] = m00[:,:,j]
 
-                #S0 normalizada
-                S0_norm = (S[:,:,:,0]//2).astype(np.uint8)
+            #Digitaliza intensidad
+            I_dig = cv2.normalize(m00, None, 0 ,255, cv2.NORM_MINMAX)
 
-                # Guarda imagen de intensidad
-                cv2.imwrite(IMG_SAVE_PATH + str(i).zfill(2) + '.png', S0_norm)
+            # Guarda imagen de intensidad
+            cv2.imwrite(IMG_SAVE_PATH + "/" + str(i).zfill(2) + '_intensidad.png', I_dig)
+
+            # Guarda Matriz de Mueller
+            cv2.imwrite(IMG_SAVE_PATH + "/" + str(i).zfill(2) + '.png', M_dig_color)
 
         #if x == y or (x < 0 and x == -y) or (x > 0 and x == 1-y):
         if x in [-X/2, X/2]:
@@ -148,15 +153,11 @@ def capturar_muestra(X, Y, tipo):
     mover_motor('Y', 'B', Y_STEPS)
     mover_motor('X', 'B', X_STEPS//2)
 
-def main(tipo = None):
-
-    #Nombre archivo
-    if tipo is None:
-        tipo = sys.argv[1]
+def main():
 
     #Captura muestra, calcula tiempo
     tic = time.time()
-    capturar_muestra(X_STEPS, Y_STEPS, tipo)        
+    capturar_muestra(X_STEPS, Y_STEPS)        
     toc = time.time()
 
     print("Muestra completa capturada en "+str(int((toc-tic)//60))+" minutos y "+str(int((toc-tic) % 60))+' segundos.')

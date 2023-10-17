@@ -1,3 +1,4 @@
+import subprocess
 from simple_pyspin import Camera
 import cv2
 import sys
@@ -6,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-from tools.stokeslib import polarization_full_dec_array, calcular_stokes, calcular_mueller_inv, acoplar_mueller, desacoplar_mueller
+from tools.stokeslib import polarization_full_dec_array, calcular_stokes, calcular_mueller_inv, acoplar_mueller, desacoplar_mueller, normalizar_mueller
 
 #Esta librería cuenta con algoritmos para controlar la cámara y los motores.
 
@@ -17,6 +18,21 @@ RPI_IP = '169.254.110.82'
 RPI_PORT = 22
 MAX8 = 2**8-1
 MAX16 = 2**16-1
+
+def runcmd(cmd, verbose = False, *args, **kwargs):
+
+    process = subprocess.Popen(
+        cmd,
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE,
+        text = True,
+        shell = True,
+        executable='/bin/bash'
+    )
+    std_out, std_err = process.communicate()
+    if verbose:
+        print(std_out.strip(), std_err)
+    pass
 
 #Control de motores
 
@@ -135,7 +151,13 @@ def take_mueller(S_in_stat_inv, exposure_time, N, path, thetas_list):
     print('Calculando Matriz de Mueller...')
     M = calcular_mueller_inv(S_in_stat_inv,S_out_stat)
 
-    return M
+    # Normaliza la matriz de Mueller
+    M_norm = normalizar_mueller(M)
+
+    # Imagen de intensidad
+    m00 = M[:,:,:,0,0]
+    
+    return m00, M_norm
 
 #Digitalizadora de medidas físicas
 

@@ -11,6 +11,8 @@ from simple_pyspin import Camera
 
 sys.path.append('../')
 from tools.stokeslib import polarization_full_dec_array, calcular_stokes
+from tools.camaralib import runcmd
+
 
 
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
@@ -38,6 +40,12 @@ class Ui(QMainWindow):
 
         #Muestra imagen
         self.start_recording(self) 
+
+        #Espera teclas movimiento
+        self.move_cam(self)
+
+        #Espera boton captura
+        self.capture_listen(self)
 
         #Muestra GUI
         self.show()
@@ -80,7 +88,7 @@ class Ui(QMainWindow):
         S0, S1, S2 = calcular_stokes(I90, I45, I135, I0)
 
         #Imagen de intensidad
-        S0 = ((S0[::decimador,::decimador,:]//2).astype(np.uint8))
+        S0 = (S0[::decimador,::decimador,:]//2).astype(np.uint8)
         
         #Formato Array to PixMap
         h, w, _ = S0.shape
@@ -89,7 +97,34 @@ class Ui(QMainWindow):
 
         #Plot
         self.S0.setPixmap(pixmap)
+    def move_up(self):
+        runcmd("cd ../; python3 motor_control_ssh.py Y B", verbose=True)
+    def move_down(self):
+        runcmd("cd ../; python3 motor_control_ssh.py Y F", verbose=True)
+    def move_left(self):
+        runcmd("cd ../; python3 motor_control_ssh.py X B", verbose=True)
+    def move_right(self):
+        runcmd("cd ../; python3 motor_control_ssh.py X F", verbose=True)
+   
+    def move_cam(self, label):
+        up_btn = self.up_btn
+        up_btn.clicked.connect(self.move_up)
         
+        dwn_btn = self.up_btn
+        dwn_btn.clicked.connect(self.move_down)
+        
+        left_btn = self.up_btn
+        left_btn.clicked.connect(self.move_left)
+        
+        right_btn = self.up_btn
+        right_btn.clicked.connect(self.move_right)
+    
+    def auto_capture(self):
+        runcmd("cd ../; python3 capturar_muestra.py", verbose=True)
+
+    def capture_listen(self, label):
+        capture_btn = self.capture_btn
+        capture_btn.clicked.connect(self.auto_capture)
 
 def main(cam):
     app = QApplication(sys.argv)
