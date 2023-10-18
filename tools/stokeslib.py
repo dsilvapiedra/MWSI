@@ -262,7 +262,10 @@ def normalizar_mueller(M):
   for i in range(3):
     for j in range(3):
       for k in range(3):
-        M_norm[:, :, k, i, j] = M_norm[:, :, k, i, j] / M_norm[:, :, k, 0, 0]
+        #print(i,j,k)
+        #print(np.mean(M[:, :, k, i, j]))
+        M_norm[:, :, k, i, j] = M_norm[:, :, k, i, j] / M[:, :, k, 0, 0]
+        print(np.mean(M_norm[:, :, k, i, j]))
   return M_norm
 
 # Version con Sin ya invertida

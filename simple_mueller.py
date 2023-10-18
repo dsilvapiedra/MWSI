@@ -29,7 +29,7 @@ def main(name = None):
         name = sys.argv[1]
 
     #Captura matriz de Mueller
-    M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
+    _, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
     #Guardar matriz de Mueller
     guardar_mueller(M, IMG_SAVE_PATH, name)

@@ -110,13 +110,13 @@ class Ui(QMainWindow):
         up_btn = self.up_btn
         up_btn.clicked.connect(self.move_up)
         
-        dwn_btn = self.up_btn
+        dwn_btn = self.dwn_btn
         dwn_btn.clicked.connect(self.move_down)
         
-        left_btn = self.up_btn
+        left_btn = self.left_btn
         left_btn.clicked.connect(self.move_left)
         
-        right_btn = self.up_btn
+        right_btn = self.right_btn
         right_btn.clicked.connect(self.move_right)
     
     def auto_capture(self):

@@ -18,8 +18,8 @@ exposure_time = 5000
 N = 1
 
 # Definir la cantidad de pasos en cada dirección
-X_STEPS = 2
-Y_STEPS = 2
+X_STEPS = 16
+Y_STEPS = 16
 
 # Calcular la posición del centro en términos de pasos
 centro_x = X_STEPS // 2
@@ -105,10 +105,12 @@ def capturar_muestra(X, Y):
             #Imprime posición actual
             print (x, y)
 
+            #Calcula Matriz de Mueller
             m00, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
+            #Salida
             M_dig_color = np.zeros((M.shape[0]*3,M.shape[1]*3,3),dtype=np.uint16)
-            I = np.zeros((1024,1224,3),dtype=np.uint8)
+
             for j in range(3):
                 #Guarda Mueller img
                 M_acoplada = acoplar_mueller(M[:,:,j,:,:])
@@ -119,11 +121,8 @@ def capturar_muestra(X, Y):
                 #Arma matriz de mueller en colores
                 M_dig_color[:,:,j] = M_dig
 
-                #Intensidad
-                I[:,:,j] = m00[:,:,j]
-
             #Digitaliza intensidad
-            I_dig = cv2.normalize(m00, None, 0 ,255, cv2.NORM_MINMAX)
+            I_dig = digitalizar(m00, 'm00')
 
             # Guarda imagen de intensidad
             cv2.imwrite(IMG_SAVE_PATH + "/" + str(i).zfill(2) + '_intensidad.png', I_dig)

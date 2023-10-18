@@ -198,6 +198,11 @@ def digitalizar(A, medida):
         A_digital[A_digital > MAX16] = MAX16
         A_digital[A_digital < 0] = 0
         A_digital = A_digital.astype(np.uint16)
+
+    #Mueller en 16 bits
+    elif medida == 'm00':
+        A_digital = A/np.max(A) * MAX16
+        A_digital = A_digital.astype(np.uint16)    
         
     return A_digital
 

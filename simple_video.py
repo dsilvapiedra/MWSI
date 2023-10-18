@@ -54,7 +54,7 @@ def main():
             S0 = (S0//2).astype(np.uint8)
 
             # Actualiza imagen
-            cv2.imshow("img", S0)
+            cv2.imshow("img", I90)
 
             #Espera comando
             k = cv2.waitKey(1)
