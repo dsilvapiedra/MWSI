@@ -4,7 +4,7 @@ import cv2
 from simple_pyspin import Camera
 from tools.stokeslib import polarization_full_dec_array, calcular_stokes
 
-#Tamaño ventana
+# Tamaño ventana
 hsize = 900
 vsize = 700
 hoffset = 40

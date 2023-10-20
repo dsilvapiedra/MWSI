@@ -5,6 +5,7 @@ import gzip
 import cv2
 from tools.camaralib import digitalizar
 
+#Rutas
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'            
 IMG_SAVE_PATH = 'mueller/'
 

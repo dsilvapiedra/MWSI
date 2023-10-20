@@ -3,6 +3,7 @@ from tools.camaralib import take_mueller_stokes, guardar_stokes
 import numpy as np
 import gzip
 
+# Ruta carpeta en dónde guardar
 IMG_SAVE_PATH = 'stokes/'  
 
 # Exposicion

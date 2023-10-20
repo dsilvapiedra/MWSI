@@ -4,6 +4,7 @@ import numpy as np
 from tools.camaralib import take_stokes, guardar_img, digitalizar
 from tools.stokeslib import calcular_dolp, calcular_aolp
 
+# Ruta carpeta en dónde guardar
 IMG_SAVE_PATH = 'img/'              
 
 #Exposicion

@@ -1,6 +1,5 @@
 import sys
 import os
-import cv2
 import numpy as np
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
@@ -17,9 +16,11 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
 )
 
+# Configuración inicial cámara
 exposure_time = 5000
 N = 1
 decimador = 2
+
 class Ui(QMainWindow):
     def __init__(self, cam):
         super(Ui, self).__init__()
@@ -95,12 +96,16 @@ class Ui(QMainWindow):
 
         #Plot
         self.S0.setPixmap(pixmap)
+
     def move_up(self):
         runcmd("cd ../; python3 motor_control_ssh.py Y B", verbose=True)
+
     def move_down(self):
         runcmd("cd ../; python3 motor_control_ssh.py Y F", verbose=True)
+
     def move_left(self):
         runcmd("cd ../; python3 motor_control_ssh.py X B", verbose=True)
+
     def move_right(self):
         runcmd("cd ../; python3 motor_control_ssh.py X F", verbose=True)
    

@@ -275,6 +275,8 @@ def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
 
     return None
 
+# Guarda Vecto de Stokes
+
 def guardar_stokes(S, path, name):
     #Colores R G B
     color = ['650', '550', '450']
@@ -310,6 +312,8 @@ def guardar_stokes(S, path, name):
 
     return True    
 
+# Guarda Matriz de Mueller
+
 def guardar_mueller(M, path, name):
     #Codigo de color
     codigo=['R','G','B']
@@ -335,6 +339,8 @@ def guardar_mueller(M, path, name):
     cv2.imwrite(path + name + ' Mueller_RGB.png', M_RGB16)
 
     return True
+
+# Trasnforma PNG en Matriz de Mueller
 
 def png2mueller(M_show, medida):
     M_analogo = analogizar(M_show, medida)

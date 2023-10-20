@@ -499,7 +499,7 @@ def calcular_aolp_mueller(M):
 
 # Diatenuación
 def calcular_diatenuacion(M):
-  D = np.sqrt(M[:,:,0,1]**2+M[:,:,0,2]**2)
+  D = np.sqrt(M[:,:,0,1]**2+M[:,:,0,2]**2)/M[:,:,0,0]
   return D
 
 # Poder de polarizancia

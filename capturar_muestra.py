@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import gzip
 
+# Ruta Stokes de entrada
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'    
 
 #Exposicion
