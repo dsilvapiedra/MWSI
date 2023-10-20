@@ -10,7 +10,6 @@ import gzip
 
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'    
 
-
 #Exposicion
 exposure_time = 5000
 

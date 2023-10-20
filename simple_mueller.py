@@ -2,11 +2,13 @@ import sys
 import numpy as np
 from tools.camaralib import guardar_mueller, take_mueller
 import gzip
+import cv2
+from tools.camaralib import digitalizar
 
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'            
 IMG_SAVE_PATH = 'mueller/'
 
-# Exposicion
+# Exposiciona
 exposure_time = 5000
 
 # Numero de promedios
@@ -29,7 +31,13 @@ def main(name = None):
         name = sys.argv[1]
 
     #Captura matriz de Mueller
-    _, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
+    m00, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
+
+    #Digitaliza intensidad
+    I_dig = digitalizar(m00, 'm00')
+
+    # Guarda imagen de intensidad
+    cv2.imwrite(IMG_SAVE_PATH + name + '_intensidad.png', I_dig)
 
     #Guardar matriz de Mueller
     guardar_mueller(M, IMG_SAVE_PATH, name)

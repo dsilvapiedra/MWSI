@@ -13,8 +13,6 @@ sys.path.append('../')
 from tools.stokeslib import polarization_full_dec_array, calcular_stokes
 from tools.camaralib import runcmd
 
-
-
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
 )
