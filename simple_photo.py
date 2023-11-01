@@ -13,11 +13,11 @@ exposure_time = 5000
 # Numero de promedios
 N = 1
 
-def main(name = None):
+def main():
 
     #Nombre archivo
-    if name is None:
-        name = sys.argv[1]
+    img_sub = input("Ingresa el directorio destino: ")
+    IMG_SAVE_PATH = 'img/' + img_sub
 
     #Capturar Stokes
     S = take_stokes(exposure_time, N)

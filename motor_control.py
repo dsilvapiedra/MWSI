@@ -9,7 +9,7 @@ motores = {
             "motor_pin2": 22,
             "motor_pin3": 2,
             "motor_pin4": 3},
-        "step_num": 10,
+        "step_num": 2*10,
     },
     "Y": {
         "motor_pins": {
@@ -17,7 +17,7 @@ motores = {
             "motor_pin2": 16,
             "motor_pin3": 20,
             "motor_pin4": 21, },
-        "step_num": 10,
+        "step_num": 2*10,
     },
     "T": {
         "motor_pins": {
@@ -25,7 +25,7 @@ motores = {
             "motor_pin2": 13,
             "motor_pin3": 6,
             "motor_pin4": 5, },
-        "step_num": 512//6, #512 por vuelta
+        "step_num": 512//12, #512 por vuelta
     }
 }
 

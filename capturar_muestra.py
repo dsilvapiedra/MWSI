@@ -1,6 +1,6 @@
 import os
 import sys
-from tools.stokeslib import acoplar_mueller
+from tools.stokeslib import acoplar_mueller, calcular_diatenuacion
 from tools.camaralib import digitalizar, take_mueller
 from motor_control_ssh import ejecutar_comando_ssh
 import time
@@ -18,8 +18,8 @@ exposure_time = 5000
 N = 1
 
 # Definir la cantidad de pasos en cada dirección
-X_STEPS = 16
-Y_STEPS = 16
+X_STEPS = 12
+Y_STEPS = 12
 
 # Calcular la posición del centro en términos de pasos
 centro_x = X_STEPS // 2
@@ -34,7 +34,7 @@ INDICE_FINAL = X_STEPS * Y_STEPS
 TIEMPO_ESPERA = 0.5
 
 #Angulos de polarizacion de entrada
-thetas_list = [0,60,120]  
+thetas_list = [0,30,60,90,120,150]  
 
 #Matrices de estadísticas	
 f = gzip.GzipFile(IMG_LOAD_PATH, 'rb')
@@ -92,8 +92,8 @@ def capturar_muestra(X, Y):
     dy = 0
 
     # Pide directorio donde guardar las imagenes
-    IMG_SAVE_PATH = input("Ingresa el directorio destino: ")
-    
+    img_sub = input("Ingresa el directorio destino: ")
+    IMG_SAVE_PATH = 'img/' + img_sub
     if not os.path.exists(IMG_SAVE_PATH): 
         os.makedirs(IMG_SAVE_PATH)
 
@@ -123,6 +123,11 @@ def capturar_muestra(X, Y):
 
             #Digitaliza intensidad
             I_dig = digitalizar(m00, 'm00')
+
+            #Diatenuacion
+            D = calcular_diatenuacion(M[:,:,1,:,:])
+            print(np.min(D),np.max(D))
+            cv2.imwrite(IMG_SAVE_PATH + "/" + str(i).zfill(2) + '_diatenuacion.png', (D*255).astype(np.uint8))
 
             # Guarda imagen de intensidad
             cv2.imwrite(IMG_SAVE_PATH + "/" + str(i).zfill(2) + '_intensidad.png', I_dig)

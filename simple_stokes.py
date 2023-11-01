@@ -16,7 +16,7 @@ N = 1
 decimador = 1
 
 #Angulos de polarizacion de entrada
-thetas_list = ['0','60','120']  
+thetas_list = [0,30,60,90,120,150]  
 
 def main():
 
