@@ -450,12 +450,12 @@ def lu_chipman(M):
 
 # Devuelve la matriz de Mueller 4x4 del polarizador lineal con transmitancia T, tasa de extinción e y 
 # ángulo de polarización theta_d (en grados)
-def mueller_polarizador(T,e,theta_d):
+def mueller_polarizador(T,D,theta_d):
   theta_d = theta_d*np.pi/180 #Radianes
   MR = np.array([[1,0,0,0],[0,np.cos(2*theta_d),np.sin(2*theta_d),0],[0,-np.sin(2*theta_d),np.cos(2*theta_d),0],[0,0,0,1]])
-  M = T/2 * MR.T @ np.array([[1+e**2,1-e**2,0,0],[1-e**2,1+e**2,0,0],[0,0,2*e,0],[0,0,0,2*e]]) @ MR
+  M = MR.T @ np.array([[1,D,0,0],[D,1,0,0],[0,0,np.sqrt(1-D**2),0],[0,0,0,np.sqrt(1-D**2)]]) @ MR
   return M
-  
+
 # Devuelve la matriz de Mueller 4x4 del retardador lineal con birrefringencia phi (en grados) y 
 # ángulo de rotación theta (en grados)
 def mueller_retardador(phi,theta):
@@ -484,7 +484,7 @@ def calcular_dolp(S0,S1,S2):
 
 #Ángulo de polarización
 def calcular_aolp(S1,S2):
-  aolp = np.pi/2-0.5*arctan3(S2.astype(float),S1.astype(float))
+  aolp = 0.5*arctan3(S2.astype(float),S1.astype(float))
   return aolp
 
 # Grado de polarización
@@ -502,6 +502,11 @@ def calcular_diatenuacion(M):
   D = np.sqrt(M[:,:,0,1]**2+M[:,:,0,2]**2)/M[:,:,0,0]
   return D
 
+# Angulo de diatenuación  
+def calcular_aod(M):
+  S1 = M[:,:,0,1];   S2 = M[:,:,0,2]
+  return calcular_aolp(S1,S2)
+
 # Poder de polarizancia
 def power_of_depolarization(M_delta):
   delta = np.ones((1024,1224))-M_delta[:,:,1,1]
@@ -509,7 +514,7 @@ def power_of_depolarization(M_delta):
 
 # Actividad optica
 def optical_activity(M_R):
-  psi = 1/2 * np.arctan2(M_R[:,:,2,1]-M_R[:,:,1,2],M_R[:,:,1,1]+M_R[:,:,2,2])
+  psi = 1/2 * arctan3(M_R[:,:,2,1]-M_R[:,:,1,2],M_R[:,:,1,1]+M_R[:,:,2,2])
   return psi
 
 # Retardancia lineal
