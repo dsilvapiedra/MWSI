@@ -4,6 +4,7 @@ from tools.camaralib import guardar_mueller, take_mueller
 import gzip
 import cv2
 from tools.camaralib import digitalizar
+import os
 
 #Rutas
 IMG_LOAD_PATH = 'stokes/Sin_inv.npy.gz'            
@@ -25,23 +26,25 @@ thetas_list = [0,30,60,90,120,150]
 f = gzip.GzipFile(IMG_LOAD_PATH, 'rb')
 S_in_stat_inv = np.load(f)[::decimador,::decimador]           
 
-def main(name = None):
+def main():
 
     #Nombre archivo
-    if name is None:
-        name = sys.argv[1]
+    name = input("Ingresa el directorio destino: ")
+    IMG_SAVE_PATH = 'img/' + name
+    if not os.path.exists(IMG_SAVE_PATH): 
+        os.makedirs(IMG_SAVE_PATH)
 
     #Captura matriz de Mueller
     m00, M = take_mueller(S_in_stat_inv, exposure_time, N, IMG_LOAD_PATH, thetas_list)
 
     #Digitaliza intensidad
-    I_dig = digitalizar(m00, 'm00')
+    m00_dig = digitalizar(m00, 'm00')
 
     # Guarda imagen de intensidad
-    cv2.imwrite(IMG_SAVE_PATH + name + '_intensidad.png', I_dig)
+    cv2.imwrite(IMG_SAVE_PATH + '/' + 'm00.png', m00_dig)
 
     #Guardar matriz de Mueller
-    guardar_mueller(M, IMG_SAVE_PATH, name)
+    guardar_mueller(M, IMG_SAVE_PATH, 'M')
 
     return True
 

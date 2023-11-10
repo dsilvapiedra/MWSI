@@ -268,7 +268,7 @@ def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
         im.set_clim(vmin=clim[0],vmax=clim[1])
 
     #Guarda Figura
-    plt.savefig(path + name + '.png')
+    plt.savefig(path + '/' + name + '.png')
 
     #Cierra Figura
     plt.close()
@@ -333,10 +333,10 @@ def guardar_mueller(M, path, name):
         im = cv2.cvtColor(cv2.applyColorMap(M_norm8, cv2.COLORMAP_JET), cv2.COLOR_BGR2RGB)
             
         #Guardar
-        guardar_img(path, im, name + ' Mueller_' + codigo[i], cmap = 'jet', clim = [-1,1])
+        guardar_img(path, im, name + '_' + codigo[i], cmap = 'jet', clim = [-1,1])
     
     #Guardar Mueller color
-    cv2.imwrite(path + name + ' Mueller_RGB.png', M_RGB16)
+    cv2.imwrite(path + '/' + name + '.png', M_RGB16)
 
     return True
 

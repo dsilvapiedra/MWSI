@@ -18,8 +18,8 @@ exposure_time = 5000
 N = 1
 
 # Definir la cantidad de pasos en cada dirección
-X_STEPS = 12
-Y_STEPS = 12
+X_STEPS = 10
+Y_STEPS = 10
 
 # Calcular la posición del centro en términos de pasos
 centro_x = X_STEPS // 2

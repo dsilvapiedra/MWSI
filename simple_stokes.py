@@ -25,10 +25,6 @@ def main():
 
     #Toma vectores de Stokes
     S_in_stat = take_mueller_stokes(exposure_time, N, thetas_list)
-        
-    #Guarda cada vector de Stokes
-    #for i in range(3):
-    #    guardar_stokes(S_in_stat[:,:,:,:,i], IMG_SAVE_PATH, name + thetas_list[i])
 
     #Guarda numpy stokes comprimido
     print("Guardando array...")
