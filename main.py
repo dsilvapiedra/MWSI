@@ -10,4 +10,6 @@ if __name__ == "__main__":
     motor_input = sys.argv[1].upper()
     movimiento_input = sys.argv[2].upper()
 
-    controlar_motores(motor_input, movimiento_input)
+    controlar_motores(motor_input, movimiento_input)a
+    
+
