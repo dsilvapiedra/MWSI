@@ -171,38 +171,38 @@ def digitalizar(A, medida):
     elif (medida == 'S1') or (medida == 'S2'):
         A_digital = ((A + MAX8) // 2).astype(np.uint8)
 
-    #DoLP entre 0 y 1
-    elif medida == 'dolp':
+    #Medida entre 0 y 1
+    elif (medida == 'DoLP') or (medida == 'D') or (medida == 'PoD'):
         A_digital = A*MAX8
         A_digital[A_digital > MAX8] = MAX8
         A_digital[A_digital < 0] = 0
-        A_digital = A_digital.astype(np.uint8)
+        A_digital = np.round(A_digital).astype(np.uint8)
 
-    #AoLP entre -pi y pi
-    elif medida == 'aolp':
-        A_digital = (A+np.pi/2)/np.pi*MAX8
+    #Ángulo entre 0 y pi
+    elif (medida == 'AoLP') or (medida == 'AoD') or (medida == 'OA') or (medida == 'LR'):
+        A_digital = A/np.pi*MAX8
         A_digital[A_digital > MAX8] = MAX8
         A_digital[A_digital < 0] = 0
-        A_digital = A_digital.astype(np.uint8)
+        A_digital = np.round(A_digital).astype(np.uint8)
 
     #Mueller en 8 bits
     elif medida == 'M8':
         A_digital = ((A + 1)/2 * MAX8)
         A_digital[A_digital > MAX8] = MAX8
         A_digital[A_digital < 0] = 0
-        A_digital = A_digital.astype(np.uint8)
+        A_digital = np.round(A_digital).astype(np.uint8)
     
     #Mueller en 16 bits
     elif medida == 'M16':
         A_digital = ((A + 1)/2 * MAX16)
         A_digital[A_digital > MAX16] = MAX16
         A_digital[A_digital < 0] = 0
-        A_digital = A_digital.astype(np.uint16)
+        A_digital = np.round(A_digital).astype(np.uint16)
 
-    #Mueller en 16 bits
+    #Componentes Mueller
     elif medida == 'm00':
         A_digital = A/np.max(A) * MAX16
-        A_digital = A_digital.astype(np.uint16)    
+        A_digital = np.round(A_digital).astype(np.uint16)    
         
     return A_digital
 
@@ -221,12 +221,12 @@ def analogizar(A, medida):
     elif (medida == 'S1') or (medida == 'S2'):
         A_analogo = (2*A - MAX8).astype(np.uint16)
 
-    #DoLP entre 0 y 1
-    elif medida == 'dolp':
+    #Medida entre 0 y 1
+    elif (medida == 'DoLP') or (medida == 'D') or (medida == 'PoD'):
         A_analogo = A/MAX8
 
-    #AoLP entre -pi y pi
-    elif medida == 'aolp':
+    #Ángulo entre 0 y pi
+    elif (medida == 'AoLP') or (medida == 'AoD') or (medida == 'OA') or (medida == 'LR'):
         A_analogo = MAX8/np.pi*A-np.pi/2
 
     #Mueller en 8 bits
