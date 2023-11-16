@@ -514,7 +514,7 @@ def power_of_depolarization(M_delta):
 
 # Actividad optica
 def optical_activity(M_R):
-  psi = 1/2 * arctan3(M_R[:,:,2,1]-M_R[:,:,1,2],M_R[:,:,1,1]+M_R[:,:,2,2])
+  psi = np.arctan2(M_R[:,:,2,1]-M_R[:,:,1,2],M_R[:,:,1,1]+M_R[:,:,2,2])
   return psi
 
 # Retardancia lineal
