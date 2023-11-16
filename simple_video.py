@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from simple_pyspin import Camera
 from tools.stokeslib import polarization_full_dec_array, calcular_stokes
+from tools.camaralib import digitalizar
 
 # Tamaño ventana
 hsize = 900
@@ -51,7 +52,7 @@ def main():
             S0, S1, S2 = calcular_stokes (I90, I45, I135, I0)
 
             #S0 normalizacion
-            S0 = (S0//2).astype(np.uint8)
+            S0 = digitalizar(S0, 'S0')
 
             # Actualiza imagen
             cv2.imshow("img", S0)
