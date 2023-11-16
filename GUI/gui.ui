@@ -354,7 +354,7 @@ QLabel {
                       </property>
                       <property name="icon">
                        <iconset>
-                        <normaloff>../../../../Descargas/rarrow.png</normaloff>../../../../Descargas/rarrow.png</iconset>
+                        <normaloff>icono/rarrow.png</normaloff>icono/rarrow.png</iconset>
                       </property>
                       <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonIconOnly</enum>
@@ -449,7 +449,7 @@ QLabel {
                       </property>
                       <property name="icon">
                        <iconset>
-                        <normaloff>../../../../Descargas/larrow.png</normaloff>../../../../Descargas/larrow.png</iconset>
+                        <normaloff>icono/larrow.png</normaloff>icono/larrow.png</iconset>
                       </property>
                       <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonIconOnly</enum>
