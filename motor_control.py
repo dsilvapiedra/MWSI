@@ -29,19 +29,11 @@ motores = {
     }
 }
 
-# Definición de la secuencia de pasos para cada motor
-sequence_nema = [[1, 0, 1, 1],
-                 [0, 0, 1, 0],
-                 [0, 1, 0, 0],
-                 [0, 1, 0, 0],
-                 [1, 1, 0, 1]]
+# Secuencias de pasos
+sequence_nema = [[1,0,1,1],[0,0,1,0],[0,1,0,0],[0,1,0,0],[1,1,0,1]]
+sequence_theta = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
 
-sequence_theta = [[1, 0, 0, 0],
-                  [0, 1, 0, 0],
-                  [0, 0, 1, 0],
-                  [0, 0, 0, 1]]
-
-# Configuración de los pines GPIO
+# Configuración pines GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
@@ -50,8 +42,7 @@ for motor, motor_info in zip(motores.keys(), motores.values()):
     for pin in pins.values():
         GPIO.setup(pin, GPIO.OUT)
 
-
-# Función para avanzar el motor un paso
+# Avanzar un paso
 def step_forward(motor):
     pins = motores[motor].get('motor_pins')
     sequence = sequence_nema if motor == "X" or motor == "Y" else sequence_theta
@@ -62,8 +53,7 @@ def step_forward(motor):
         GPIO.output(pins["motor_pin4"], step[3])
         time.sleep(0.01)
 
-
-# Función para retroceder el motor un paso
+# Retroceder un paso
 def step_backward(motor):
     pins = motores[motor].get('motor_pins')
     sequence = sequence_nema if motor == "X" or motor == "Y" else sequence_theta
@@ -74,8 +64,7 @@ def step_backward(motor):
         GPIO.output(pins["motor_pin4"], step[3])
         time.sleep(0.01)
 
-
-# Función para controlar los motores
+# Controlar motores
 def controlar_motores(motor_input, movimiento_input):
     try:
         if motor_input not in motores or movimiento_input not in ["F", "B"]:
@@ -84,19 +73,21 @@ def controlar_motores(motor_input, movimiento_input):
         motor = motor_input
         movimiento = movimiento_input
         steps = motores[motor].get("step_num")
+
         if movimiento == "F":
             for _ in range(steps):
                 step_forward(motor)
+
         elif movimiento == "B":
             for _ in range(steps):
                 step_backward(motor)
 
     except KeyboardInterrupt:
-        # Detener el motor si se interrumpe manualmente con Ctrl+C
+        # Detener motor
         GPIO.cleanup()
 
 
-# Ejemplo de uso con valores proporcionados desde línea de comandos
+# Main
 if __name__ == "__main__":
     import sys
 
