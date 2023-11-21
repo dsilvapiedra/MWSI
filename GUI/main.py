@@ -11,8 +11,8 @@ from simple_pyspin import Camera
 import cv2
 
 sys.path.append('../')
-from tools.stokeslib import polarization_full_dec_array, calcular_stokes
-from tools.camaralib import runcmd
+from tools.stokeslib import polarization_full_dec_array, calcular_stokes, calcular_dolp, calcular_aolp
+from tools.camaralib import runcmd, digitalizar
 
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
@@ -69,9 +69,10 @@ class Ui(QMainWindow):
 
     def start_cam(self, label):
 
-        #Exposicion
+        #Modo de Exposición
         self.cam.ExposureAuto = 'Off'
     	
+        #Tiempo de exposición
         self.exposure_time = exposure_time
 
         #Formato
@@ -95,10 +96,12 @@ class Ui(QMainWindow):
 
     def update_image(self):
         #Actualiza configuración
-        self.interpolador = 'vecinos'
+        self.interpolador = 'vecinos' if self.vecinos_btn.isChecked() else 'bilineal'
         self.N = self.N_edit.text()
         self.exposure_time = int(self.exposicion_edit.text())
         
+        print()
+
         #Captura imagen
         raw = self.cam.get_array()
 
@@ -108,8 +111,27 @@ class Ui(QMainWindow):
         #Stokes
         S0, S1, S2 = calcular_stokes(I90, I45, I135, I0)
 
-        #Imagen de intensidad
-        img = (I90[::decimador,::decimador,:]).astype(np.uint8)
+        #Elegir Medida
+        if self.medida_box.currentText() == 'I0':
+            medida = I0
+        elif self.medida_box.currentText() == 'I45':
+            medida = I45
+        elif self.medida_box.currentText() == 'I90':
+            medida = I90
+        elif self.medida_box.currentText() == 'I135':
+            medida = I135
+        elif self.medida_box.currentText() == 'S0':
+            medida = digitalizar(S0, 'S0')
+        elif self.medida_box.currentText() == 'S1':
+            medida = digitalizar(S1, 'S1')
+        elif self.medida_box.currentText() == 'S2':
+            medida = digitalizar(S2, 'S2')
+        elif self.medida_box.currentText() == 'DoLP':
+            medida = digitalizar(calcular_dolp(S0,S1,S2), 'DoLP')
+        elif self.medida_box.currentText() == 'AoLP':
+            medida = digitalizar(calcular_aolp(S1,S2), 'AoLP')
+        #Imagen de la medida elegida
+        img = (medida[::decimador,::decimador,:]).astype(np.uint8)
         img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         
         #Formato Array to PixMap
