@@ -1,12 +1,14 @@
 import sys
 import os
 import numpy as np
-from PyQt5 import QtGui, QtCore
+from threading import Thread
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import QLibraryInfo
 from simple_pyspin import Camera
+import cv2
 
 sys.path.append('../')
 from tools.stokeslib import polarization_full_dec_array, calcular_stokes
@@ -16,9 +18,22 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
 )
 
+#Threading motores
+class thread_motor(Thread):
+    def __init__(self, motor, movimiento):
+        super(thread_motor, self).__init__()
+        self.motor = motor
+        self.movimiento = movimiento
+    def run(self):
+        comando = "cd ../; python3 motor_control_ssh.py " + self.motor + ' ' + self.movimiento
+        runcmd(comando, verbose=True)
+
 # Configuración inicial cámara
 exposure_time = 5000
+interpolador = 'vecinos'
 N = 1
+
+#Decimador imagen
 decimador = 2
 
 class Ui(QMainWindow):
@@ -29,22 +44,25 @@ class Ui(QMainWindow):
         self.cam = cam
 
         # Carga GUI diseñado
-        loadUi('gui.ui',self)      
+        loadUi('gui.ui', self)      
             
         #Inicializa Cámara
         self.start_cam(self)
 
         #Configura Cámara
-        self.config_cam(self, exposure_time, N)
+        self.config_cam(self)
 
         #Muestra imagen
         self.start_recording(self) 
 
-        #Espera teclas movimiento
-        self.move_cam(self)
+        #Espera boton motor
+        self.motor_listen(self)
 
         #Espera boton captura
         self.capture_listen(self)
+
+        #Espera cambios en la configuración
+        self.config_listen(self)
 
         #Muestra GUI
         self.show()
@@ -54,21 +72,20 @@ class Ui(QMainWindow):
         #Exposicion
         self.cam.ExposureAuto = 'Off'
     	
+        self.exposure_time = exposure_time
+
         #Formato
         self.cam.PixelFormat = "BayerRG8"
 
         #Inicia cámara
         self.cam.start()
 
-    def config_cam(self, label, exposure_time, N):
-        
-        #Tiempo de exposicion
-        self.cam.ExposureTime = exposure_time # microseconds
+    def config_cam(self, label):
+        #Cambia tiempo de exposición
+        self.cam.ExposureTime = self.exposure_time
 
-        #Número de promedios
-        self.N = N
-
-    def start_recording(self, label):   	
+    def start_recording(self, label):  
+        #Timer 	
         timer = QtCore.QTimer(self)
         
         #Conexión
@@ -77,57 +94,94 @@ class Ui(QMainWindow):
         self.update_image()    
 
     def update_image(self):
+        #Actualiza configuración
+        self.interpolador = 'vecinos'
+        self.N = self.N_edit.text()
+        self.exposure_time = int(self.exposicion_edit.text())
+        
         #Captura imagen
-        img = self.cam.get_array()
+        raw = self.cam.get_array()
 
         #Medibles
-        I90, I45, I135, I0 = polarization_full_dec_array(img)
+        I90, I45, I135, I0 = polarization_full_dec_array(raw, interpolacion = self.interpolador)
 
         #Stokes
         S0, S1, S2 = calcular_stokes(I90, I45, I135, I0)
 
         #Imagen de intensidad
-        S0 = (S0[::decimador,::decimador,:]//2).astype(np.uint8)
+        img = (I90[::decimador,::decimador,:]).astype(np.uint8)
+        img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         
         #Formato Array to PixMap
-        h, w, _ = S0.shape
-        S0QIMG = QImage(S0, w, h, QImage.Format_RGB888)
+        h, w, _ = img.shape
+        S0QIMG = QImage(img, w, h, QImage.Format_RGB888)
         pixmap = QPixmap(S0QIMG)
 
         #Plot
-        self.S0.setPixmap(pixmap)
+        self.img.setPixmap(pixmap)
 
     def move_up(self):
-        runcmd("cd ../; python3 motor_control_ssh.py Y B", verbose=True)
+        thread = thread_motor("Y","B")
+        thread.start()
 
     def move_down(self):
-        runcmd("cd ../; python3 motor_control_ssh.py Y F", verbose=True)
+        thread = thread_motor("Y","F")
+        thread.start()
 
     def move_left(self):
-        runcmd("cd ../; python3 motor_control_ssh.py X B", verbose=True)
+        thread = thread_motor("X","B")
+        thread.start()
 
     def move_right(self):
-        runcmd("cd ../; python3 motor_control_ssh.py X F", verbose=True)
+        thread = thread_motor("X","F")
+        thread.start()  
+
+    def rotate_left(self):
+        thread = thread_motor("T","B")
+        thread.start()  
+
+    def rotate_right(self):
+        thread = thread_motor("T","F")
+        thread.start()  
+
+    def auto_capture(self):
+        self.cam.stop()
+        runcmd("cd ../; python3 simple_mueller.py", verbose=True)
+        self.cam.start()
    
-    def move_cam(self, label):
+    def motor_listen(self, label):
+        #Arriba
         up_btn = self.up_btn
         up_btn.clicked.connect(self.move_up)
         
+        #Abajo
         dwn_btn = self.dwn_btn
         dwn_btn.clicked.connect(self.move_down)
         
+        #Izquierda
         left_btn = self.left_btn
         left_btn.clicked.connect(self.move_left)
         
+        #Derecha
         right_btn = self.right_btn
         right_btn.clicked.connect(self.move_right)
-    
-    def auto_capture(self):
-        runcmd("cd ../; python3 capturar_muestra.py", verbose=True)
 
+        #Girar izquierda
+        rotate_left_btn = self.rotate_left_btn
+        rotate_left_btn.clicked.connect(self.rotate_left)
+
+        #Girar derecha
+        rotate_right_btn = self.rotate_right_btn
+        rotate_right_btn.clicked.connect(self.rotate_right)
+    
     def capture_listen(self, label):
         capture_btn = self.capture_btn
         capture_btn.clicked.connect(self.auto_capture)
+
+    def config_listen(self, label):
+        #Exposición
+        config_btn = self.config_btn
+        config_btn.clicked.connect(self.config_cam)
 
 def main(cam):
     app = QApplication(sys.argv)
