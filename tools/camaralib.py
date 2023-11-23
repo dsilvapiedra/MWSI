@@ -50,7 +50,6 @@ def ejecutar_comando_ssh(comando):
     print(stdout.read().decode())
     print(stderr.read().decode())
     ssh.close()
-    
     return stdout.readlines()
 
 #Captura una imagen de intensidad  simplepyspin
@@ -67,11 +66,11 @@ def take_photo(exposure_time, N):
 
     	#Toma las fotos
         cam.start() # Start recording
-        imgs = [cam.get_array() for n in range(N)] # Get 10 frames
+        imgs = [np.uint16(cam.get_array()) for n in range(N)] # Get N frames
         cam.stop() # Stop recording
 
     	#Promedia las fotos 
-        img_mean = 1/N*(sum(imgs)).astype(float)
+        img_mean = (1/N*sum(imgs)).astype(np.uint8)
     
     return imgs[0]
 
@@ -203,6 +202,10 @@ def digitalizar(A, medida):
     elif medida == 'm00':
         A_digital = A/np.max(A) * MAX16
         A_digital = np.round(A_digital).astype(np.uint16)    
+
+    #Cualquier otro caso:
+    else:
+        A_digital = A
         
     return A_digital
 
@@ -236,6 +239,10 @@ def analogizar(A, medida):
     #Mueller en 16 bits
     elif medida == 'M16':
         A_analogo = 2/MAX16*A - 1
+
+    #Cualquier otro caso
+    else:
+        A_analogo = A
   
     return A_analogo
 
@@ -243,7 +250,7 @@ def analogizar(A, medida):
 
 def guardar_img(path, img, name, cmap = 'gray', color = 'white', clim = None):
     # Magnificacion
-    Mag = 22
+    Mag = 11
 
     #Crea Figure
     fig = plt.figure()
@@ -312,7 +319,7 @@ def guardar_stokes(S, path, name):
 
     return True    
 
-# Guarda Matriz de Mueller
+# Guarda Matriz de Mueller en formato PNG
 
 def guardar_mueller(M, path, name):
     #Codigo de color

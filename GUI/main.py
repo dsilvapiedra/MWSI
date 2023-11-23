@@ -75,6 +75,9 @@ class Ui(QMainWindow):
         #Tiempo de exposición
         self.exposure_time = exposure_time
 
+        #Número de promedios
+        self.N = N
+
         #Formato
         self.cam.PixelFormat = "BayerRG8"
 
@@ -84,6 +87,10 @@ class Ui(QMainWindow):
     def config_cam(self, label):
         #Cambia tiempo de exposición
         self.cam.ExposureTime = self.exposure_time
+
+    def config_program(self, label):
+        #Cambia número de promedio
+        self.N = self.new_N
 
     def start_recording(self, label):  
         #Timer 	
@@ -97,39 +104,29 @@ class Ui(QMainWindow):
     def update_image(self):
         #Actualiza configuración
         self.interpolador = 'vecinos' if self.vecinos_btn.isChecked() else 'bilineal'
-        self.N = self.N_edit.text()
         self.exposure_time = int(self.exposicion_edit.text())
-        
-        print()
+        self.new_N = int(self.N_edit.text())
 
         #Captura imagen
-        raw = self.cam.get_array()
-
+        raws = [np.uint16(self.cam.get_array()) for n in range(self.N)]
+        raw = (1/self.N*sum(raws)).astype(np.uint8)
+        
         #Medibles
         I90, I45, I135, I0 = polarization_full_dec_array(raw, interpolacion = self.interpolador)
 
         #Stokes
         S0, S1, S2 = calcular_stokes(I90, I45, I135, I0)
 
-        #Elegir Medida
-        if self.medida_box.currentText() == 'I0':
-            medida = I0
-        elif self.medida_box.currentText() == 'I45':
-            medida = I45
-        elif self.medida_box.currentText() == 'I90':
-            medida = I90
-        elif self.medida_box.currentText() == 'I135':
-            medida = I135
-        elif self.medida_box.currentText() == 'S0':
-            medida = digitalizar(S0, 'S0')
-        elif self.medida_box.currentText() == 'S1':
-            medida = digitalizar(S1, 'S1')
-        elif self.medida_box.currentText() == 'S2':
-            medida = digitalizar(S2, 'S2')
-        elif self.medida_box.currentText() == 'DoLP':
-            medida = digitalizar(calcular_dolp(S0,S1,S2), 'DoLP')
-        elif self.medida_box.currentText() == 'AoLP':
-            medida = digitalizar(calcular_aolp(S1,S2), 'AoLP')
+        #Medida a mostrar
+        medida_str = self.medida_box.currentText()
+
+        if medida_str == 'DoLP':
+            medida = digitalizar(calcular_dolp(S0, S1, S2), 'DoLP')
+        elif medida_str == 'AoLP':
+            medida = digitalizar(calcular_aolp(S1, S2), 'AoLP')
+        else:
+            medida = digitalizar(locals()[medida_str], medida_str)
+        
         #Imagen de la medida elegida
         img = (medida[::decimador,::decimador,:]).astype(np.uint8)
         img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
@@ -201,9 +198,11 @@ class Ui(QMainWindow):
         capture_btn.clicked.connect(self.auto_capture)
 
     def config_listen(self, label):
-        #Exposición
         config_btn = self.config_btn
+        #Camara
         config_btn.clicked.connect(self.config_cam)
+        #Programa
+        config_btn.clicked.connect(self.config_program)
 
 def main(cam):
     app = QApplication(sys.argv)

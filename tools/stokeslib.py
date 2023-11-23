@@ -52,6 +52,8 @@ def bayer_interpolacion_vecinos(M):
 #
 
 def bayer_interpolacion_bilineal(M):
+  #Evita Overflow y define salida
+  M = M.astype(np.uint16)
   I = np.zeros((M.shape[0],M.shape[1],3), dtype=np.uint8)
   #Rojos
   I[0::2,0::2,2] = M[0::2,0::2]
@@ -257,13 +259,10 @@ def calcular_mueller(S_in_stat,S_out_stat):
 def normalizar_mueller(M):
   # Normaliza una matriz de mueller M
   # En cada i,j y en cada color k, divide la componente i,j,k por m00
-
   M_norm = M.copy()
   for i in range(3):
     for j in range(3):
       for k in range(3):
-        #print(i,j,k)
-        #print(np.mean(M[:, :, k, i, j]))
         M_norm[:, :, k, i, j] = M_norm[:, :, k, i, j] / M[:, :, k, 0, 0]
         print(np.mean(M_norm[:, :, k, i, j]))
   return M_norm
